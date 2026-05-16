@@ -6,7 +6,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PresupuestosPro">
-<title>Presupuestos Pro</title>
+<title>PresupuestosPro</title>
+<!-- Icono iPhone -->
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="icon.png">
+<!-- Color barra Safari iPhone -->
+<meta name="theme-color" content="#0B63F6">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;max-width:430px;margin:0 auto;min-height:100vh}
@@ -143,22 +149,6 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .emp-switch-item{padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0;cursor:pointer}
 .emp-switch-item.active-emp{background:#f0f9ff}
 </style>
-  
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>PresupuestosPro</title>
-
-  <!-- Icono iPhone -->
-  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="icon.png">
-
-  <!-- Color barra Safari iPhone -->
-  <meta name="theme-color" content="#0B63F6">
-
-
 </head>
 <body>
 
@@ -443,7 +433,7 @@ const DEFAULT_EMPRESAS=[
 // ════════════════════════════════════════════
 // STORAGE
 // ════════════════════════════════════════════
-const KP='pp_presupuestos',KS='pp_servicios',KE='pp_empresas',KA='pp_active';
+const KP='pp_presupuestos',KS='pp_servicios',KE='pp_empresas',KA='pp_active',KU='pp_sync_url';
 let empresas=JSON.parse(localStorage.getItem(KE)||'null')||DEFAULT_EMPRESAS;
 let presupuestos=JSON.parse(localStorage.getItem(KP)||'[]');
 let servicios=JSON.parse(localStorage.getItem(KS)||'[]');
@@ -732,8 +722,29 @@ function renderEmpresas(){
   });
   html+=`<div class="settings-sec" style="margin-top:4px">
     <div class="settings-title">☁️ Copias de Seguridad</div>
-    <button onclick="backupCompleto()" style="width:100%;padding:12px;border-radius:12px;border:none;background:var(--emp);color:white;font-size:14px;font-weight:700;margin-bottom:8px;cursor:pointer">☁️ Guardar Copia de Seguridad</button>
-    <button onclick="document.getElementById('inp-restore-emp').click()" style="width:100%;padding:12px;border-radius:12px;border:2px solid var(--emp);background:var(--blight);color:var(--emp);font-size:14px;font-weight:700;cursor:pointer">♻️ Restaurar Copia de Seguridad</button>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:5px">🔗 URL de Google Sheets (Apps Script)</label>
+      <input id="sync-url-input" type="url" placeholder="https://script.google.com/macros/s/..." 
+        value="${esc(getSyncUrl())}"
+        style="font-size:12px;padding:9px 12px;border-radius:10px;border:1.5px solid #e0e8f0;width:100%;box-sizing:border-box;background:white"
+        oninput="saveSyncUrl(this.value)">
+      <div style="font-size:11px;color:var(--gray);margin-top:4px">Pega aquí la URL del Web App de Google Apps Script</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <button onclick="syncToSheets()" style="padding:12px;border-radius:12px;border:none;background:#0F9D58;color:white;font-size:13px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
+        <span style="font-size:20px">☁️</span>Guardar en<br>Google Sheets
+      </button>
+      <button onclick="restoreFromSheets()" style="padding:12px;border-radius:12px;border:2px solid #0F9D58;background:#f0fdf4;color:#0F9D58;font-size:13px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
+        <span style="font-size:20px">🔄</span>Restaurar de<br>Google Sheets
+      </button>
+    </div>
+
+    <div style="height:1px;background:#e8f0f8;margin:10px 0"></div>
+
+    <button onclick="backupCompleto()" style="width:100%;padding:11px;border-radius:12px;border:none;background:var(--emp);color:white;font-size:13px;font-weight:700;margin-bottom:8px;cursor:pointer">📥 Guardar copia local (.json)</button>
+    <button onclick="document.getElementById('inp-restore-emp').click()" style="width:100%;padding:11px;border-radius:12px;border:2px solid var(--emp);background:var(--blight);color:var(--emp);font-size:13px;font-weight:700;cursor:pointer">📤 Restaurar copia local (.json)</button>
     <input type="file" id="inp-restore-emp" accept=".json" style="display:none" onchange="restaurar(this)">
   </div>`;
   return html+'</div>';
@@ -1255,6 +1266,44 @@ function restaurar(input){
     }catch(err){showToast('❌ Archivo de copia no válido',true);}
   };
   r.readAsText(file);input.value='';
+}
+
+// ════════════════════════════════════════════
+// GOOGLE SHEETS SYNC
+// ════════════════════════════════════════════
+function getSyncUrl(){ return localStorage.getItem(KU)||''; }
+function saveSyncUrl(url){ localStorage.setItem(KU, url.trim()); }
+
+async function syncToSheets(){
+  const url=getSyncUrl();
+  if(!url){ showToast('⚠️ Configura primero la URL de Google Sheets',true); return; }
+  const data={version:3,fecha:new Date().toISOString(),empresas,presupuestos,servicios,activeEmpId};
+  try{
+    showToast('☁️ Sincronizando con Google Sheets...');
+    await fetch(url,{method:'POST',body:JSON.stringify(data),headers:{'Content-Type':'text/plain'}});
+    showToast('✅ Datos guardados en Google Sheets');
+  }catch(e){ showToast('❌ Error de conexión. Revisa la URL.',true); }
+}
+
+async function restoreFromSheets(){
+  const url=getSyncUrl();
+  if(!url){ showToast('⚠️ Configura primero la URL de Google Sheets',true); return; }
+  try{
+    showToast('🔄 Descargando datos de Google Sheets...');
+    const resp=await fetch(url+'?t='+Date.now());
+    const text=await resp.text();
+    const data=JSON.parse(text);
+    if(!data||!data.presupuestos) throw new Error('Datos inválidos');
+    const fecha=data.fecha?new Date(data.fecha).toLocaleDateString('es-ES'):'desconocida';
+    if(!confirm(`¿Restaurar datos del ${fecha}?\n\nEsto reemplazará todos los datos actuales del dispositivo.`))return;
+    if(data.empresas)empresas=data.empresas;
+    presupuestos=data.presupuestos;
+    if(data.servicios)servicios=data.servicios;
+    if(data.activeEmpId)activeEmpId=data.activeEmpId;
+    saveEmps();savePres();saveSrvs();saveActive();
+    showToast('✅ Datos restaurados desde Google Sheets');
+    render();
+  }catch(e){ showToast('❌ Error al restaurar. Revisa la URL.',true); }
 }
 
 // ════════════════════════════════════════════
