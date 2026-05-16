@@ -1053,127 +1053,196 @@ function abrirPDF(id){
   const e=getEmp(p.empresaId);
   const clr=e.logoColor||'#0099CC';
   const esTexto=e.logoTipo==='texto';
+
   const lineasHTML=p.lineas.map((l,i)=>`
-    <tr style="background:${i%2===0?'#fff':'#f8fafc'}">
-      <td style="padding:9px 10px;font-size:10.5px;color:#333;border-bottom:1px solid #eef2f5;vertical-align:top">
-        <strong style="display:block;margin-bottom:2px">${esc(l.concepto)}</strong>
-        ${l.desc?`<span style="color:#555;font-size:10px;line-height:1.5">${esc(l.desc)}</span>`:''}
+    <tr style="background:${i%2===0?'#fff':'#f5f5f5'}">
+      <td style="padding:8px 10px;font-size:10px;color:#333;border-bottom:1px solid #e8e8e8;vertical-align:top">
+        ${l.concepto?`<strong style="display:block;color:#000;margin-bottom:3px">${esc(l.concepto)}</strong>`:''}
+        ${l.desc?`<span style="color:#444;line-height:1.5">${esc(l.desc)}</span>`:''}
       </td>
-      <td style="padding:9px 10px;font-size:10.5px;text-align:center;border-bottom:1px solid #eef2f5;white-space:nowrap">${fm(l.cantidad)}</td>
-      <td style="padding:9px 10px;font-size:10.5px;text-align:right;border-bottom:1px solid #eef2f5;white-space:nowrap">${fm(l.precio)} €</td>
-      <td style="padding:9px 10px;font-size:10.5px;text-align:right;border-bottom:1px solid #eef2f5;font-weight:700;white-space:nowrap">${fm(l.total)} €</td>
+      <td style="padding:8px 10px;font-size:10px;text-align:right;border-bottom:1px solid #e8e8e8;white-space:nowrap;vertical-align:top">${fm(l.cantidad)}</td>
+      <td style="padding:8px 10px;font-size:10px;text-align:right;border-bottom:1px solid #e8e8e8;white-space:nowrap;vertical-align:top">${fm(l.precio)}</td>
+      <td style="padding:8px 10px;font-size:10px;text-align:right;border-bottom:1px solid #e8e8e8;white-space:nowrap;vertical-align:top">${fm(l.total)}</td>
     </tr>`).join('');
 
-  const logoHTML=esTexto
-    ?`<div style="font-size:28px;font-weight:900;color:#0d2233;letter-spacing:-1px">${esc(e.nombre)}</div>`
-    :`<div style="display:flex;align-items:center;gap:12px">
-        <div style="width:54px;height:54px;background:${clr};border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:20px">${esc(e.siglas||e.nombre.slice(0,2).toUpperCase())}</div>
-        <div><div style="font-size:16px;font-weight:900;color:#0d2233;text-transform:uppercase">${esc(e.nombre)}</div>
-        <div style="font-size:10px;color:${clr};font-weight:600">IMPERMEABILIZACIÓN PROFESIONAL</div></div>
+  // Logo según tipo de empresa
+  const logoHTML = esTexto
+    ? `<div style="font-size:36px;font-weight:900;color:#1a1a2e;font-family:Arial,sans-serif;letter-spacing:-1px;line-height:1">${esc(e.nombre)}</div>`
+    : `<div style="display:flex;align-items:center;gap:14px">
+        <div style="width:60px;height:60px;background:${clr};border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:22px;flex-shrink:0">${esc(e.siglas||e.nombre.slice(0,2).toUpperCase())}</div>
+        <div>
+          <div style="font-size:15px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:1px">${esc(e.nombre)}</div>
+        </div>
       </div>`;
 
-  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  const html=`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Presupuesto ${esc(String(p.numero))} - ${esc(e.nombre)}</title>
-<style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f5f5}
-.bar{position:fixed;top:0;left:0;right:0;background:${clr};color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99}
-.bar button{background:white;color:${clr};border:none;border-radius:20px;padding:8px 18px;font-weight:700;font-size:13px;cursor:pointer}
-.bar .hint{font-size:11px;opacity:.85;margin-top:2px}
-.doc{max-width:800px;margin:66px auto 30px;background:white;box-shadow:0 4px 30px rgba(0,0,0,.15)}
-.dh{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 26px 16px;border-bottom:3px solid ${clr}}
-.pt{font-size:36px;font-weight:900;color:#dde8f0;letter-spacing:3px;align-self:center}
-.cb{background:#f8fafc;padding:8px 26px;display:flex;gap:18px;flex-wrap:wrap;font-size:9.5px;color:#666;border-bottom:1px solid #e8eef5}
-.bd{padding:18px 26px}
-.ir{display:flex;gap:14px;margin-bottom:16px}
-.clb{flex:1;background:#f8fafc;border-radius:8px;padding:12px;border-left:3px solid ${clr}}
-.cll{font-size:8.5px;font-weight:700;color:${clr};text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.cln{font-weight:700;font-size:12px;color:#0d2233}
-.cld{font-size:10px;color:#444;margin-top:3px;line-height:1.5}
-.sb{background:${clr};border-radius:10px;padding:12px 16px;text-align:center;min-width:155px;align-self:flex-start}
-.sl{font-size:8.5px;color:rgba(255,255,255,.8);font-weight:600;text-transform:uppercase;margin-bottom:3px}
-.sv{font-size:11px;color:white;font-weight:700}
-.stv{font-size:20px;font-weight:900;color:white}
-.hr2{border:none;border-top:1px solid rgba(255,255,255,.3);margin:6px 0}
-table{width:100%;border-collapse:collapse;margin-bottom:14px}
-thead tr{background:${clr}}
-th{padding:9px 10px;text-align:left;font-size:9.5px;font-weight:700;color:white;text-transform:uppercase}
-th:nth-child(n+2){text-align:right}th:nth-child(2){text-align:center}
-.tw{display:flex;justify-content:flex-end;margin-bottom:14px}
-.ti{width:230px;border:1px solid #e0e8f0;border-radius:8px;overflow:hidden}
-.tr2{display:flex;justify-content:space-between;padding:7px 12px;font-size:10.5px;border-bottom:1px solid #e8eef3}
-.tfin{background:${clr};color:white;font-weight:800;font-size:13px;border:none}
-.ft{display:flex;gap:14px;padding-top:12px;border-top:2px solid #e0e8f0}
-.fp{flex:1;font-size:9px;color:#444;line-height:1.7}
-.fc{background:#f8fafc;border-radius:6px;padding:9px;font-size:8.5px;color:#555;line-height:1.5;flex:1}
-.sg{text-align:right;margin-top:14px;padding-top:10px;border-top:1px solid #e0e8f0}
-.sgl{border-top:1px solid #0d2233;width:120px;margin:26px 0 4px auto}
-.bb{background:#f8fafc;padding:8px 26px;display:flex;justify-content:space-between;font-size:9px;color:#666;border-top:1px solid #e0e8f0}
-@media print{.bar{display:none!important}.doc{margin:0;box-shadow:none}}
-</style></head><body>
-<div class="bar">
-  <div><div style="font-weight:700;font-size:14px">📄 Presupuesto #${esc(String(p.numero))} — ${esc(e.nombre)}</div>
-  <div class="hint">iPhone: Compartir ⬆ → Imprimir → Guardar como PDF</div></div>
-  <button onclick="window.print()">🖨️ PDF</button>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+body{font-family:Arial,Helvetica,sans-serif;background:#eee;color:#333;font-size:11px}
+.topbar{position:fixed;top:0;left:0;right:0;background:${clr};color:white;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.topbar button{background:white;color:${clr};border:none;border-radius:20px;padding:7px 18px;font-weight:700;font-size:13px;cursor:pointer}
+.topbar .hint{font-size:11px;opacity:.9;margin-top:2px}
+.doc{max-width:820px;margin:60px auto 30px;background:white;box-shadow:0 2px 20px rgba(0,0,0,.15)}
+/* ── CABECERA ── */
+.cab{display:flex;justify-content:space-between;align-items:center;padding:18px 24px 14px;border-bottom:2px solid #ddd}
+.cab-titulo{font-size:42px;font-weight:900;color:#d0dde8;letter-spacing:4px}
+/* ── BARRA CONTACTO ── */
+.bcontacto{display:flex;gap:0;background:#f8f8f8;border-bottom:1px solid #e0e0e0}
+.bcontacto span{flex:1;padding:7px 12px;font-size:9px;color:#555;border-right:1px solid #e0e0e0;display:flex;align-items:center;gap:4px}
+.bcontacto span:last-child{border-right:none}
+/* ── SECCIÓN CLIENTE + RESUMEN ── */
+.sec-cliente{display:flex;padding:16px 24px;gap:20px;align-items:flex-start;border-bottom:1px solid #eee}
+.cliente-info{flex:1;font-size:10px;line-height:1.8;color:#333}
+.cliente-info .atencion{font-size:9px;color:#888;font-weight:600;margin-bottom:4px}
+.cliente-info .campo{display:flex;gap:4px}
+.cliente-info .campo .lbl{font-weight:600;color:#333;min-width:65px}
+/* ── CAJA RESUMEN 3 COLUMNAS ── */
+.resumen-box{background:${clr};min-width:300px}
+.resumen-box table{width:100%;border-collapse:collapse}
+.resumen-box td{padding:10px 16px;text-align:center;border-right:1px solid rgba(255,255,255,.25);vertical-align:middle}
+.resumen-box td:last-child{border-right:none}
+.resumen-box .ico{font-size:22px;color:rgba(255,255,255,.7);display:block;margin-bottom:4px}
+.resumen-box .rlbl{font-size:8.5px;color:rgba(255,255,255,.85);font-weight:400;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px}
+.resumen-box .rval{font-size:13px;color:white;font-weight:700;display:block}
+.resumen-box .rval.grande{font-size:18px;font-weight:900}
+/* ── TABLA ── */
+.zona-tabla{padding:0 24px 0}
+table.items{width:100%;border-collapse:collapse;margin-bottom:0}
+table.items thead tr{background:${clr}}
+table.items thead th{padding:8px 10px;font-size:9.5px;color:white;font-weight:700;text-align:left}
+table.items thead th.r{text-align:right}
+/* ── TOTALES ── */
+.zona-totales{display:flex;justify-content:flex-end;padding:0 24px 16px;margin-top:8px}
+.totales-caja{width:260px;border:1px solid #ddd}
+.tot-fila{display:flex;justify-content:space-between;padding:6px 12px;font-size:10.5px;border-bottom:1px solid #eee}
+.tot-fila.final{background:${clr};color:white;font-weight:700;font-size:12px;border:none}
+/* ── PIE ── */
+.pie{display:flex;gap:20px;padding:14px 24px;border-top:2px solid #e0e0e0;background:#fff}
+.pie-izq{flex:1;font-size:9px;line-height:1.8;color:#444}
+.pie-der{flex:1;font-size:9px;line-height:1.6;color:#444}
+.pie-firma{margin-top:12px;padding-top:10px;text-align:right;border-top:1px solid #ddd}
+.firma-linea{border-top:1px solid #555;width:130px;margin:28px 0 4px auto}
+.bcontacto2{display:flex;gap:0;background:#f8f8f8;border-top:1px solid #ddd}
+.bcontacto2 span{flex:1;padding:7px 12px;font-size:9px;color:#555;border-right:1px solid #e0e0e0;display:flex;align-items:center;gap:4px}
+.bcontacto2 span:last-child{border-right:none}
+.pago-icono{display:inline-block;width:22px;height:16px;background:#bbb;border-radius:3px;vertical-align:middle;margin-right:4px}
+@media print{.topbar{display:none!important}.doc{margin:0;box-shadow:none}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div style="font-weight:700;font-size:14px">📄 Presupuesto #${esc(String(p.numero))} · ${esc(p.cliente)}</div>
+    <div class="hint">iPhone: Compartir ⬆ → Imprimir → Guardar como PDF</div>
+  </div>
+  <button onclick="window.print()">🖨️ Imprimir / PDF</button>
 </div>
+
 <div class="doc">
-  <div class="dh">
+
+  <!-- CABECERA -->
+  <div class="cab">
     ${logoHTML}
-    <div class="pt">PRESUPUESTO</div>
+    <div class="cab-titulo">PRESUPUESTO</div>
   </div>
-  <div class="cb">
-    <span>✉ ${esc(e.email)}</span><span>📞 ${esc(e.tel)}</span>
-    <span>🕐 ${esc(e.horario)}</span><span>🌐 ${esc(e.web)}</span>
+
+  <!-- BARRA CONTACTO -->
+  <div class="bcontacto">
+    <span>✉ ${esc(e.email)}</span>
+    <span>📞 ${esc(e.tel)}</span>
+    <span>🕐 ${esc(e.horario)}</span>
+    <span>🌐 ${esc(e.web)}</span>
   </div>
-  <div class="bd">
-    <div class="ir">
-      <div class="clb">
-        <div class="cll">A la atención de</div>
-        <div class="cln">${esc(p.cliente)}</div>
-        <div class="cld">
-          ${p.direccion?esc(p.direccion)+'<br>':''}
-          ${p.tel?'Tel: '+esc(p.tel)+'<br>':''}
-          ${p.email?'Email: '+esc(p.email):''}
-        </div>
-      </div>
-      <div class="sb">
-        <div class="sl">Total Presupuesto</div><div class="stv">${fm(p.total)} €</div>
-        <div class="hr2"></div>
-        <div class="sl">Fecha</div><div class="sv">${esc(p.fecha)}</div>
-        <div class="hr2"></div>
-        <div class="sl">Nº Presupuesto</div><div class="sv">${esc(String(p.numero))}</div>
-      </div>
+
+  <!-- CLIENTE + RESUMEN -->
+  <div class="sec-cliente">
+    <div class="cliente-info">
+      <div class="atencion">A la atención de</div>
+      <div class="campo"><span class="lbl">Nombre:</span><span>${esc(p.cliente)}</span></div>
+      ${p.direccion?`<div class="campo"><span class="lbl">Dirección:</span><span>${esc(p.direccion)}</span></div>`:''}
+      ${p.tel?`<div class="campo"><span class="lbl">Tel:</span><span>${esc(p.tel)}</span></div>`:''}
+      ${p.email?`<div class="campo"><span class="lbl">Email:</span><span>${esc(p.email)}</span></div>`:''}
     </div>
-    <table>
-      <thead><tr>
-        <th style="width:56%">Artículo / Servicio</th>
-        <th style="width:11%;text-align:center">Cantidad</th>
-        <th style="width:16%;text-align:right">Precio /ud</th>
-        <th style="width:17%;text-align:right">Total</th>
-      </tr></thead>
+    <div class="resumen-box">
+      <table>
+        <tr>
+          <td><span class="ico">€</span><span class="rlbl">Total Presupuesto</span><span class="rval grande">${fm(p.total)} €</span></td>
+          <td><span class="ico">📅</span><span class="rlbl">Fecha</span><span class="rval">${esc(p.fecha)}</span></td>
+          <td><span class="ico">≡</span><span class="rlbl">Nº Presupuesto</span><span class="rval">${esc(String(p.numero))}</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="zona-tabla">
+    <table class="items">
+      <thead>
+        <tr>
+          <th style="width:56%">Artículo/Servicio</th>
+          <th class="r" style="width:11%">Cantidad</th>
+          <th class="r" style="width:16%">Precio/ud</th>
+          <th class="r" style="width:17%">Total</th>
+        </tr>
+      </thead>
       <tbody>${lineasHTML}</tbody>
     </table>
-    <div class="tw"><div class="ti">
-      <div class="tr2"><span>Subtotal</span><span>${fm(p.subtotal)} €</span></div>
-      <div class="tr2"><span>IVA ${p.ivaPct}%</span><span>${fm(p.ivaImporte)} €</span></div>
-      <div class="tr2 tfin"><span>TOTAL</span><span>${fm(p.total)} €</span></div>
-    </div></div>
-    <div class="ft">
-      <div class="fp">
-        <strong>💳 Transferencia bancaria</strong><br>${esc(e.banco)}<br>IBAN ${esc(e.iban)}<br><br>
-        <strong>Condiciones de pago:</strong><br>${esc(e.condPago)}
+  </div>
+
+  <!-- TOTALES -->
+  <div class="zona-totales">
+    <div class="totales-caja">
+      <div class="tot-fila"><span>Subtotal</span><span>${fm(p.subtotal)} €</span></div>
+      <div class="tot-fila"><span>IVA ${p.ivaPct}%</span><span>${fm(p.ivaImporte)} €</span></div>
+      <div class="tot-fila"><span>Descuento</span><span>0,00 €</span></div>
+      <div class="tot-fila final"><span>TOTAL</span><span>${fm(p.total)} €</span></div>
+    </div>
+  </div>
+
+  <!-- PIE -->
+  <div class="pie">
+    <div class="pie-izq">
+      <div style="margin-bottom:8px">
+        <span class="pago-icono" style="background:#999"></span>
+        <strong>Transferencia bancaria</strong><br>
+        ${esc(e.banco)}<br>
+        IBAN &nbsp;${esc(e.iban)}
       </div>
-      <div>
-        <div class="fc"><strong>Condiciones del precio:</strong><br>${esc(e.condPrecio)}${p.notas?'<br><br><strong>Notas:</strong><br>'+esc(p.notas):''}</div>
-        <div class="sg">
-          <strong style="font-size:10px">${esc(e.firmaNombre)}</strong><br>
-          <span style="font-size:9px;color:#666">${esc(e.firmaRol)}</span>
-          <div class="sgl"></div>
-          <span style="font-size:8px;color:#999">Firma cliente:</span>
-        </div>
+      <div style="margin-bottom:10px">
+        <span class="pago-icono" style="background:#999"></span>
+        <strong>Pago con tarjeta</strong><br>
+        Aceptamos Visa, MasterCard. (Para menos de 1000€)
+      </div>
+      <strong>Condiciones de pago:</strong><br>${esc(e.condPago)}
+    </div>
+    <div class="pie-der">
+      <strong>Condiciones del precio:</strong><br>
+      ${esc(e.condPrecio)}
+      ${p.notas?`<br><br><strong>Notas:</strong><br>${esc(p.notas)}`:''}
+      <div class="pie-firma">
+        <span style="font-size:10px;font-weight:700">Firma cliente:</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <strong style="font-size:10px">${esc(e.firmaNombre)}</strong><br>
+        <span style="font-size:9px;color:#666">${esc(e.firmaRol)}</span>
+        <div class="firma-linea"></div>
       </div>
     </div>
   </div>
-  <div class="bb"><span>✉ ${esc(e.email)}</span><span>📞 ${esc(e.tel)}</span><span>🌐 ${esc(e.web)}</span></div>
+
+  <!-- BARRA CONTACTO INFERIOR -->
+  <div class="bcontacto2">
+    <span>✉ ${esc(e.email)}</span>
+    <span>📞 ${esc(e.tel)}</span>
+    <span>🕐 ${esc(e.horario)}</span>
+    <span>🌐 ${esc(e.web)}</span>
+  </div>
+
 </div>
 </body></html>`;
 
@@ -1183,7 +1252,6 @@ th:nth-child(n+2){text-align:right}th:nth-child(2){text-align:center}
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url),10000);
 }
-
 // ════════════════════════════════════════════
 // WHATSAPP & EMAIL
 // ════════════════════════════════════════════
