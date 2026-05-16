@@ -141,6 +141,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 /* ── TOAST ───────────────────────────────── */
 #toast{display:none;position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--dark);color:white;padding:11px 20px;border-radius:50px;font-size:13px;font-weight:700;z-index:900;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap}
 #toast.err{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
 
 /* ── EMP SWITCHER ────────────────────────── */
 .emp-switcher{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:none;align-items:flex-end}
@@ -163,6 +164,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
       </div>
     </div>
     <div class="hbtns">
+      <div id="sync-dot" title="Estado sincronización" style="width:10px;height:10px;border-radius:50%;background:#888;flex-shrink:0;align-self:center;margin-right:2px"></div>
       <button class="btn-hdr btn-cfg" onclick="setTab('empresas')">🏢</button>
       <button class="btn-hdr btn-add" id="btn-add" onclick="onAddBtn()">+</button>
     </div>
@@ -439,9 +441,9 @@ let presupuestos=JSON.parse(localStorage.getItem(KP)||'[]');
 let servicios=JSON.parse(localStorage.getItem(KS)||'[]');
 let activeEmpId=localStorage.getItem(KA)||empresas[0].id;
 
-const savePres=()=>localStorage.setItem(KP,JSON.stringify(presupuestos));
-const saveSrvs=()=>localStorage.setItem(KS,JSON.stringify(servicios));
-const saveEmps=()=>localStorage.setItem(KE,JSON.stringify(empresas));
+const savePres=()=>{ localStorage.setItem(KP,JSON.stringify(presupuestos)); autoSync(); };
+const saveSrvs=()=>{ localStorage.setItem(KS,JSON.stringify(servicios)); autoSync(); };
+const saveEmps=()=>{ localStorage.setItem(KE,JSON.stringify(empresas)); autoSync(); };
 const saveActive=()=>localStorage.setItem(KA,activeEmpId);
 
 const getEmp=id=>empresas.find(e=>e.id===(id||activeEmpId))||empresas[0];
@@ -1269,7 +1271,47 @@ function restaurar(input){
 }
 
 // ════════════════════════════════════════════
-// GOOGLE SHEETS SYNC
+// AUTO-SYNC (se dispara con cada cambio)
+// ════════════════════════════════════════════
+let syncTimer=null;
+let syncStatus='idle'; // idle | syncing | ok | error
+
+function setSyncDot(estado){
+  syncStatus=estado;
+  const dot=document.getElementById('sync-dot');
+  if(!dot)return;
+  const map={idle:'#888',syncing:'#f59e0b',ok:'#22c55e',error:'#ef4444'};
+  dot.style.background=map[estado]||'#888';
+  dot.title={idle:'Sin sincronización configurada',syncing:'Sincronizando...',ok:'Sincronizado con Google Sheets ✓',error:'Error de sincronización'}[estado]||'';
+  if(estado==='syncing'){
+    dot.style.animation='pulse 1s infinite';
+  } else {
+    dot.style.animation='none';
+  }
+}
+
+function autoSync(){
+  const url=getSyncUrl();
+  if(!url){ setSyncDot('idle'); return; }
+  clearTimeout(syncTimer);
+  setSyncDot('syncing');
+  syncTimer=setTimeout(()=>syncBackground(),1500);
+}
+
+async function syncBackground(){
+  const url=getSyncUrl();
+  if(!url)return;
+  const data={version:3,fecha:new Date().toISOString(),empresas,presupuestos,servicios,activeEmpId};
+  try{
+    await fetch(url,{method:'POST',mode:'no-cors',body:JSON.stringify(data),headers:{'Content-Type':'text/plain'}});
+    setSyncDot('ok');
+  }catch(e){
+    setSyncDot('error');
+  }
+}
+
+// ════════════════════════════════════════════
+// GOOGLE SHEETS SYNC (manual)
 // ════════════════════════════════════════════
 function getSyncUrl(){ return localStorage.getItem(KU)||''; }
 function saveSyncUrl(url){ localStorage.setItem(KU, url.trim()); }
@@ -1277,23 +1319,23 @@ function saveSyncUrl(url){ localStorage.setItem(KU, url.trim()); }
 async function syncToSheets(){
   const url=getSyncUrl();
   if(!url){ showToast('⚠️ Configura primero la URL de Google Sheets',true); return; }
-  const data={version:3,fecha:new Date().toISOString(),empresas,presupuestos,servicios,activeEmpId};
-  try{
-    showToast('☁️ Sincronizando con Google Sheets...');
-    await fetch(url,{method:'POST',body:JSON.stringify(data),headers:{'Content-Type':'text/plain'}});
-    showToast('✅ Datos guardados en Google Sheets');
-  }catch(e){ showToast('❌ Error de conexión. Revisa la URL.',true); }
+  setSyncDot('syncing');
+  showToast('☁️ Sincronizando...');
+  await syncBackground();
+  if(syncStatus==='ok') showToast('✅ Guardado en Google Sheets');
+  else showToast('❌ Error de conexión. Revisa la URL.',true);
 }
 
 async function restoreFromSheets(){
   const url=getSyncUrl();
   if(!url){ showToast('⚠️ Configura primero la URL de Google Sheets',true); return; }
   try{
-    showToast('🔄 Descargando datos de Google Sheets...');
-    const resp=await fetch(url+'?t='+Date.now());
+    showToast('🔄 Descargando datos...');
+    const resp=await fetch(url+'?t='+Date.now(),{redirect:'follow'});
     const text=await resp.text();
-    const data=JSON.parse(text);
-    if(!data||!data.presupuestos) throw new Error('Datos inválidos');
+    let data;
+    try{ data=JSON.parse(text); }catch(e){ throw new Error('Respuesta no válida: '+text.slice(0,100)); }
+    if(!data||!data.presupuestos) throw new Error('Sin datos válidos en Google Sheets');
     const fecha=data.fecha?new Date(data.fecha).toLocaleDateString('es-ES'):'desconocida';
     if(!confirm(`¿Restaurar datos del ${fecha}?\n\nEsto reemplazará todos los datos actuales del dispositivo.`))return;
     if(data.empresas)empresas=data.empresas;
@@ -1303,7 +1345,7 @@ async function restoreFromSheets(){
     saveEmps();savePres();saveSrvs();saveActive();
     showToast('✅ Datos restaurados desde Google Sheets');
     render();
-  }catch(e){ showToast('❌ Error al restaurar. Revisa la URL.',true); }
+  }catch(e){ showToast('❌ '+e.message,true); }
 }
 
 // ════════════════════════════════════════════
@@ -1311,6 +1353,7 @@ async function restoreFromSheets(){
 // ════════════════════════════════════════════
 updateEmpColors();
 render();
+setTimeout(()=>setSyncDot(getSyncUrl()?'ok':'idle'),500);
 </script>
 </body>
 </html>
