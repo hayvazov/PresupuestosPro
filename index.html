@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PresupuestosPro">
+<title>Presupuestos Pro</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;max-width:430px;margin:0 auto;min-height:100vh}
+button{cursor:pointer;font-family:inherit;border:none;transition:transform .1s}
+button:active{transform:scale(.96)}
+input,textarea,select{font-family:inherit;font-size:14px;outline:none;border:1.5px solid #e0e8f0;border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box;background:white}
+textarea{resize:none}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+:root{--blue:#0099CC;--blue2:#007aad;--blight:#e8f6fb;--dark:#0d2233;--gray:#6b7a8a;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--purple:#8b5cf6;--emp:#0099CC}
+
+/* ── HEADER ─────────────────────────────── */
+#header{background:linear-gradient(135deg,var(--dark),#0a1f35);padding:14px 16px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.hrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hlogo{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer}
+.hlogo-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:white;flex-shrink:0}
+.hlogo-info{flex:1;min-width:0}
+.hlogo-name{color:white;font-size:13px;font-weight:700;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hlogo-sub{color:rgba(255,255,255,.45);font-size:10px;font-weight:500}
+.hbtns{display:flex;gap:8px;flex-shrink:0}
+.btn-hdr{border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.btn-add{background:var(--emp);color:white;font-size:22px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.btn-cfg{background:rgba(255,255,255,.12);color:white}
+/* TABS */
+.tabs{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:10px 12px;border:none;background:transparent;font-weight:600;font-size:11px;color:rgba(255,255,255,.4);border-bottom:3px solid transparent;white-space:nowrap}
+.tab-btn.active{color:var(--emp);border-bottom-color:var(--emp)}
+
+/* ── LAYOUT ─────────────────────────────── */
+#content{padding-bottom:40px}
+.pad{padding:14px}
+.sec{background:white;border-radius:16px;padding:14px;margin-bottom:12px}
+.sec-title{font-weight:700;font-size:12px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--emp)}
+.field{margin-bottom:12px}
+.field label{font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:5px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.page-title{font-weight:700;font-size:17px;color:var(--dark);margin-bottom:14px}
+
+/* ── STAT CARDS ─────────────────────────── */
+.stat-row{display:grid;gap:8px;margin-bottom:14px}
+.stat-card{background:white;border-radius:14px;padding:12px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat-card .sv{font-size:22px;font-weight:800;color:var(--dark)}
+.stat-card .sl{font-size:10px;color:var(--gray);font-weight:600;margin-top:2px}
+
+/* ── PRESUPUESTO CARDS ───────────────────── */
+.pres-card{background:white;border-radius:18px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);border-left:4px solid var(--emp)}
+.pres-card.aceptado{border-left-color:var(--green)}
+.pres-card.rechazado{border-left-color:var(--red)}
+.pres-card.enviado{border-left-color:var(--yellow)}
+.pres-main{padding:12px 14px;display:flex;align-items:center;gap:12px}
+.pres-num{min-width:52px;height:42px;background:var(--blight);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:var(--emp);flex-shrink:0;padding:0 6px}
+.pres-info{flex:1;min-width:0}
+.pres-cliente{font-weight:700;font-size:15px;color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pres-meta{font-size:11px;color:var(--gray);margin-top:2px}
+.pres-total{font-weight:800;font-size:16px;color:var(--emp);flex-shrink:0;text-align:right}
+.pres-emp{font-size:10px;color:var(--gray);margin-top:1px;text-align:right}
+.estado-badge{display:inline-block;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;margin-top:3px}
+
+/* ── EMPRESA CARDS ───────────────────────── */
+.emp-card{background:white;border-radius:18px;margin-bottom:10px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);border-left:4px solid var(--purple);cursor:pointer}
+.emp-card.activa{border:2px solid var(--emp);border-left:4px solid var(--emp)}
+
+/* ── CLIENTE CARDS ───────────────────────── */
+.cliente-card{background:white;border-radius:18px;margin-bottom:10px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);border-left:4px solid var(--emp);cursor:pointer}
+
+/* ── SERVICIO ITEMS ──────────────────────── */
+.srv-item{background:#f8fafc;border-radius:12px;padding:11px 13px;margin-bottom:8px;border:1.5px solid #e8f0f8;display:flex;align-items:center;justify-content:space-between}
+
+/* ── LINEA ITEMS ─────────────────────────── */
+.linea-item{background:#f8fafc;border-radius:12px;padding:10px 12px;margin-bottom:8px;border:1.5px solid #e8f0f8}
+.linea-concepto{font-weight:700;font-size:13px;color:var(--dark)}
+.linea-desc{font-size:12px;color:var(--gray);margin-top:2px;line-height:1.4}
+.linea-nums{display:flex;gap:8px;font-size:12px;color:var(--gray);margin-top:5px}
+.linea-nums span{font-weight:600;color:var(--dark)}
+.btn-del{background:#fee2e2;color:var(--red);border:none;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;flex-shrink:0}
+.btn-add-linea{width:100%;padding:10px;border:2px dashed var(--emp);background:var(--blight);color:var(--emp);border-radius:12px;font-size:13px;font-weight:700;margin-top:4px}
+
+/* ── TOTALS ──────────────────────────────── */
+.totals-box{background:#f8fafc;border-radius:12px;padding:12px 14px}
+.total-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #edf2f7}
+.total-row.final{font-weight:800;font-size:16px;color:var(--emp);border:none;padding-top:8px}
+
+/* ── ESTADO SELECTOR ─────────────────────── */
+.estado-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.estado-opt{padding:10px;border-radius:12px;border:2px solid #e0e8f0;background:white;font-size:12px;font-weight:700;color:var(--gray)}
+.so-borrador{border-color:#94a3b8;color:#94a3b8;background:#f8fafc}
+.so-enviado{border-color:var(--yellow);color:var(--yellow);background:#fffbeb}
+.so-aceptado{border-color:var(--green);color:var(--green);background:#f0fdf4}
+.so-rechazado{border-color:var(--red);color:var(--red);background:#fef2f2}
+
+/* ── MODALS ──────────────────────────────── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:flex-end}
+.modal-bg.active{display:flex}
+.modal-bg.center{align-items:center;justify-content:center;padding:16px}
+.modal-sheet{background:#f0f4f8;border-radius:24px 24px 0 0;width:100%;max-height:95vh;overflow-y:auto}
+.modal-center{background:white;border-radius:20px;width:100%;max-width:380px;overflow:hidden}
+.modal-hdr{padding:15px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.modal-hdr .title{color:white;font-weight:700;font-size:16px}
+.modal-close{background:rgba(255,255,255,.2);color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;font-weight:700}
+.modal-body{padding:16px}
+
+/* ── SETTINGS ────────────────────────────── */
+.settings-sec{background:white;border-radius:16px;padding:14px;margin-bottom:12px}
+.settings-title{font-weight:700;font-size:13px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--blight);color:var(--emp)}
+
+/* ── ACTION BUTTONS ──────────────────────── */
+.btn-save{width:100%;padding:14px;border-radius:14px;border:none;color:white;font-size:15px;font-weight:700;margin-top:12px}
+.btn-cancel2{width:100%;padding:12px;border-radius:14px;border:2px solid #e0e8f0;background:white;font-size:14px;font-weight:600;color:var(--gray);margin-top:8px}
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.act-btn{padding:13px;border-radius:14px;border:none;font-weight:700;font-size:12px;color:white;display:flex;flex-direction:column;align-items:center;gap:3px}
+.act-btn .ai{font-size:20px}
+.act-full{width:100%;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:700;margin-bottom:8px}
+
+/* ── STEP BOX ────────────────────────────── */
+.step-box{background:#f0f9ff;border-radius:14px;padding:12px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;flex-shrink:0}
+.step-text{font-size:13px;color:var(--dark);font-weight:600;line-height:1.3}
+.step-sub{font-size:11px;color:var(--gray);font-weight:400;margin-top:2px}
+
+/* ── EMPTY ───────────────────────────────── */
+.empty{text-align:center;padding:50px 20px;color:#aaa}
+.empty .icon{font-size:50px;margin-bottom:12px}
+.empty .msg{font-size:16px;font-weight:600}
+.empty .sub{font-size:13px;margin-top:6px}
+
+/* ── TOAST ───────────────────────────────── */
+#toast{display:none;position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--dark);color:white;padding:11px 20px;border-radius:50px;font-size:13px;font-weight:700;z-index:900;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap}
+#toast.err{background:var(--red)}
+
+/* ── EMP SWITCHER ────────────────────────── */
+.emp-switcher{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:none;align-items:flex-end}
+.emp-switcher.active{display:flex}
+.emp-switcher-sheet{background:white;border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;overflow:hidden}
+.emp-switch-item{padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0;cursor:pointer}
+.emp-switch-item.active-emp{background:#f0f9ff}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────── -->
+<div id="header">
+  <div class="hrow">
+    <div class="hlogo" onclick="abrirEmpSwitcher()">
+      <div class="hlogo-icon" id="hdr-icon">IB</div>
+      <div class="hlogo-info">
+        <div class="hlogo-name" id="hdr-nombre">Impermeabilización Balear</div>
+        <div class="hlogo-sub">Toca para cambiar empresa ▾</div>
+      </div>
+    </div>
+    <div class="hbtns">
+      <button class="btn-hdr btn-cfg" onclick="setTab('empresas')">🏢</button>
+      <button class="btn-hdr btn-add" id="btn-add" onclick="onAddBtn()">+</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-lista" onclick="setTab('lista')">📋 Presupuestos</button>
+    <button class="tab-btn" id="tab-clientes" onclick="setTab('clientes')">👥 Clientes</button>
+    <button class="tab-btn" id="tab-servicios" onclick="setTab('servicios')">🔧 Servicios</button>
+    <button class="tab-btn" id="tab-empresas" onclick="setTab('empresas')">🏢 Empresas</button>
+  </div>
+</div>
+
+<div id="content"></div>
+
+<!-- ══ EMPRESA SWITCHER ════════════════════ -->
+<div class="emp-switcher" id="emp-switcher">
+  <div class="emp-switcher-sheet">
+    <div style="padding:16px 20px;font-weight:700;font-size:16px;color:var(--dark);border-bottom:2px solid #f0f0f0">
+      🏢 Seleccionar empresa activa
+    </div>
+    <div id="emp-switcher-list"></div>
+    <div style="padding:14px 20px">
+      <button onclick="cerrarEmpSwitcher()" style="width:100%;padding:12px;border-radius:12px;border:2px solid #e0e8f0;background:white;font-size:14px;font-weight:600;color:var(--gray)">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: NUEVO/EDITAR PRESUPUESTO ════ -->
+<div class="modal-bg" id="modal-pres">
+  <div class="modal-sheet">
+    <div class="modal-hdr" id="modal-pres-hdr" style="border-radius:24px 24px 0 0">
+      <div class="title" id="mp-title">➕ Nuevo Presupuesto</div>
+      <button class="modal-close" onclick="cerrarModalPres()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sec">
+        <div class="sec-title">📋 Presupuesto</div>
+        <div class="field-row">
+          <div class="field"><label>Nº Presupuesto</label><input id="p-num" type="text"></div>
+          <div class="field"><label>Fecha</label><input id="p-fecha" placeholder="DD/MM/AAAA"></div>
+        </div>
+        <div class="field">
+          <label>Estado</label>
+          <div class="estado-grid">
+            <button class="estado-opt so-borrador" id="est-borrador" onclick="selEstado('borrador')">📝 Borrador</button>
+            <button class="estado-opt" id="est-enviado" onclick="selEstado('enviado')">📤 Enviado</button>
+            <button class="estado-opt" id="est-aceptado" onclick="selEstado('aceptado')">✅ Aceptado</button>
+            <button class="estado-opt" id="est-rechazado" onclick="selEstado('rechazado')">❌ Rechazado</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">👤 Cliente</div>
+        <div class="field"><label>Nombre / Empresa *</label><input id="p-cliente" placeholder="Nombre o empresa"></div>
+        <div class="field"><label>Dirección</label><input id="p-dir" placeholder="Dirección completa"></div>
+        <div class="field-row">
+          <div class="field"><label>Teléfono</label><input id="p-tel" type="tel" placeholder="600 123 456"></div>
+          <div class="field"><label>Email</label><input id="p-email" type="email" placeholder="cliente@email.com"></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🔨 Líneas de Trabajo</div>
+        <div id="lineas-container"></div>
+        <button class="btn-add-linea" onclick="abrirModalLinea(null)">+ Añadir línea</button>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">💰 Totales</div>
+        <div class="field">
+          <label>IVA (%)</label>
+          <select id="p-iva" onchange="calcTotales()">
+            <option value="10" selected>10%</option>
+            <option value="21">21%</option>
+            <option value="0">0% (exento)</option>
+          </select>
+        </div>
+        <div class="totals-box">
+          <div class="total-row"><span>Subtotal</span><span id="t-sub">0,00 €</span></div>
+          <div class="total-row"><span id="t-iva-lbl">IVA 10%</span><span id="t-iva">0,00 €</span></div>
+          <div class="total-row final"><span>TOTAL</span><span id="t-total">0,00 €</span></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">📝 Notas</div>
+        <textarea id="p-notas" rows="3" placeholder="Observaciones, condiciones especiales..."></textarea>
+      </div>
+
+      <button class="btn-save" id="btn-guardar-pres" onclick="guardarPresupuesto()" style="background:var(--emp)">💾 Guardar Presupuesto</button>
+      <button class="btn-cancel2" onclick="cerrarModalPres()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: LÍNEA ════════════════════════ -->
+<div class="modal-bg center" id="modal-linea">
+  <div class="modal-center">
+    <div class="modal-hdr" id="linea-hdr" style="border-radius:20px 20px 0 0">
+      <div class="title" style="font-size:14px">Línea de trabajo</div>
+      <button class="modal-close" onclick="cerrarModalLinea()">✕</button>
+    </div>
+    <div style="padding:14px">
+      <!-- Servicio guardado -->
+      <div class="field">
+        <label>📁 Aplicar servicio guardado (opcional)</label>
+        <select id="l-servicio-sel" onchange="aplicarServicio(this.value)">
+          <option value="">— Seleccionar servicio —</option>
+        </select>
+      </div>
+      <div style="height:1px;background:#e8f0f8;margin:0 0 12px"></div>
+      <div class="field"><label>Concepto *</label><input id="l-concepto" placeholder="Nombre corto en negrita (ej: Impermeabilización poliuretano)"></div>
+      <div class="field"><label>Descripción detallada</label><textarea id="l-desc" rows="3" placeholder="Descripción larga del trabajo, materiales, proceso..."></textarea></div>
+      <div class="field-row">
+        <div class="field"><label>Cantidad</label><input id="l-cant" type="number" value="1" min="0.01" step="0.01"></div>
+        <div class="field"><label>Precio / ud (€)</label><input id="l-precio" type="number" placeholder="0.00" step="0.01"></div>
+      </div>
+      <div style="background:#f0f9ff;border-radius:10px;padding:10px 12px;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--emp)">
+        Total línea: <span id="l-total-preview">0,00 €</span>
+      </div>
+      <button onclick="guardarLinea()" style="width:100%;padding:13px;border-radius:12px;border:none;background:var(--emp);color:white;font-size:14px;font-weight:700">✅ Añadir</button>
+      <button onclick="cerrarModalLinea()" style="width:100%;padding:11px;border-radius:12px;border:2px solid #e0e8f0;background:white;font-size:13px;font-weight:600;color:var(--gray);margin-top:8px">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: NUEVO SERVICIO ══════════════ -->
+<div class="modal-bg center" id="modal-srv">
+  <div class="modal-center">
+    <div class="modal-hdr" id="srv-hdr" style="border-radius:20px 20px 0 0">
+      <div class="title" id="srv-title" style="font-size:14px">Nuevo Servicio</div>
+      <button class="modal-close" onclick="cerrarModalSrv()">✕</button>
+    </div>
+    <div style="padding:14px">
+      <div class="field"><label>Concepto / Nombre *</label><input id="s-concepto" placeholder="Nombre corto (ej: Impermeabilización)"></div>
+      <div class="field"><label>Descripción por defecto</label><textarea id="s-desc" rows="3" placeholder="Texto que se pre-rellena al seleccionar..."></textarea></div>
+      <div class="field"><label>Precio orientativo (€)</label><input id="s-precio" type="number" placeholder="0.00" step="0.01"></div>
+      <button onclick="guardarServicio()" style="width:100%;padding:13px;border-radius:12px;border:none;background:var(--emp);color:white;font-size:14px;font-weight:700;margin-top:4px">💾 Guardar servicio</button>
+      <button onclick="cerrarModalSrv()" style="width:100%;padding:11px;border-radius:12px;border:2px solid #e0e8f0;background:white;font-size:13px;font-weight:600;color:var(--gray);margin-top:8px">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: NUEVA/EDITAR EMPRESA ════════ -->
+<div class="modal-bg" id="modal-emp">
+  <div class="modal-sheet">
+    <div class="modal-hdr" style="background:linear-gradient(135deg,var(--dark),#0a1f35);border-radius:24px 24px 0 0">
+      <div class="title" id="emp-form-title">🏢 Nueva Empresa</div>
+      <button class="modal-close" onclick="cerrarModalEmp()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sec">
+        <div class="sec-title">🏢 Identidad</div>
+        <div class="field"><label>Nombre empresa *</label><input id="e-nombre" placeholder="Nombre completo"></div>
+        <div class="field-row">
+          <div class="field"><label>Siglas / Icono</label><input id="e-siglas" maxlength="3" placeholder="IB"></div>
+          <div class="field"><label>Color</label><input id="e-color" type="color" value="#0099CC" style="height:42px;padding:4px 8px;cursor:pointer"></div>
+        </div>
+        <div class="field"><label>Tipo de logo en PDF</label>
+          <select id="e-logo-tipo">
+            <option value="iniciales">Iniciales en caja (estilo IB)</option>
+            <option value="texto">Nombre como texto grande (estilo Impernave)</option>
+          </select>
+        </div>
+        <div class="field"><label>Dirección</label><input id="e-dir" placeholder="Dirección fiscal"></div>
+      </div>
+      <div class="sec">
+        <div class="sec-title">📞 Contacto</div>
+        <div class="field"><label>Teléfono</label><input id="e-tel" type="tel" placeholder="+34 000 000 000"></div>
+        <div class="field"><label>Email</label><input id="e-email" type="email" placeholder="info@empresa.com"></div>
+        <div class="field"><label>Web</label><input id="e-web" placeholder="www.empresa.com"></div>
+        <div class="field"><label>Horario</label><input id="e-horario" placeholder="Lunes a Viernes 9h a 17h"></div>
+      </div>
+      <div class="sec">
+        <div class="sec-title">🏦 Datos bancarios</div>
+        <div class="field"><label>Banco</label><input id="e-banco" placeholder="Banco ABANCA"></div>
+        <div class="field"><label>IBAN</label><input id="e-iban" placeholder="ES00 0000 0000 0000 0000 0000"></div>
+      </div>
+      <div class="sec">
+        <div class="sec-title">📜 Condiciones</div>
+        <div class="field"><label>Condiciones de pago</label><textarea id="e-cond-pago" rows="5"></textarea></div>
+        <div class="field"><label>Condiciones del precio</label><textarea id="e-cond-precio" rows="3"></textarea></div>
+      </div>
+      <div class="sec">
+        <div class="sec-title">✍️ Firma</div>
+        <div class="field-row">
+          <div class="field"><label>Nombre</label><input id="e-firma-nombre"></div>
+          <div class="field"><label>Cargo</label><input id="e-firma-rol"></div>
+        </div>
+      </div>
+      <button class="btn-save" id="btn-guardar-emp" onclick="guardarEmpresa()" style="background:var(--purple)">💾 Guardar Empresa</button>
+      <button class="btn-cancel2" onclick="cerrarModalEmp()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: VER PRESUPUESTO ═════════════ -->
+<div class="modal-bg" id="modal-ver">
+  <div class="modal-sheet">
+    <div class="modal-hdr" id="modal-ver-hdr" style="border-radius:24px 24px 0 0">
+      <div class="title" id="mv-title">Presupuesto</div>
+      <button class="modal-close" onclick="cerrarModalVer()">✕</button>
+    </div>
+    <div class="modal-body" id="mv-body"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: COMPARTIR ════════════════════ -->
+<div class="modal-bg center" id="modal-share">
+  <div class="modal-center">
+    <div class="modal-hdr" id="share-hdr" style="border-radius:20px 20px 0 0">
+      <div class="title" id="share-title" style="font-size:14px">Enviar Presupuesto</div>
+      <button class="modal-close" onclick="document.getElementById('modal-share').classList.remove('active')">✕</button>
+    </div>
+    <div style="padding:14px" id="share-body"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: FICHA CLIENTE ═══════════════ -->
+<div class="modal-bg" id="modal-cliente">
+  <div class="modal-sheet">
+    <div class="modal-hdr" id="mc-hdr" style="border-radius:24px 24px 0 0">
+      <div class="title" id="mc-title">Cliente</div>
+      <button class="modal-close" onclick="document.getElementById('modal-cliente').classList.remove('active')">✕</button>
+    </div>
+    <div class="modal-body" id="mc-body"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CONFIRMAR ════════════════════ -->
+<div class="modal-bg center" id="modal-confirm" style="z-index:500">
+  <div class="modal-center" style="padding:24px;text-align:center">
+    <div style="font-size:44px;margin-bottom:10px">🗑️</div>
+    <div style="font-weight:700;font-size:16px;margin-bottom:6px" id="confirm-msg">¿Eliminar?</div>
+    <div style="color:#888;font-size:13px;margin-bottom:20px">Esta acción no se puede deshacer</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button onclick="cerrarConfirm()" style="padding:12px;border-radius:12px;border:2px solid #e0e8f0;background:white;font-size:14px;font-weight:600">Cancelar</button>
+      <button onclick="confirmAction()" style="padding:12px;border-radius:12px;border:none;background:var(--red);color:white;font-size:14px;font-weight:700">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+// DEFAULTS
+// ════════════════════════════════════════════
+const COND_PAGO_DEF='50% como aceptación del presupuesto, el 40% a mitad de la obra y el 10% el día que termine el trabajo presentando el comprobante de la transferencia. El presupuesto incluye todos los materiales y mano de obra necesarios para llevar a cabo la obra. Todo lo que no esté especificado en este presupuesto, NO está incluido (licencias, permisos, asume, andamios, plataformas elevadoras, etc.).';
+const COND_PRECIO_DEF='La validez del presupuesto es de 30 días naturales. La validez del descuento aplicado es de 2 días laborales desde la fecha de emisión.';
+
+const DEFAULT_EMPRESAS=[
+  {id:'ib',nombre:'Impermeabilización Balear',siglas:'IB',logoColor:'#0099CC',logoTipo:'iniciales',
+   dir:'',tel:'+34 871510043',email:'info@impermeabilizacionbalear.es',
+   web:'www.impermeabilizacionbalear.es',horario:'Lunes a Viernes 9h a 17h',
+   banco:'Banco ABANCA',iban:'ES6920805830763040076067',
+   condPago:COND_PAGO_DEF,condPrecio:COND_PRECIO_DEF,
+   firmaNombre:'Impermeabilización Balear',firmaRol:'Administración'},
+  {id:'impernave',nombre:'Impernave',siglas:'IM',logoColor:'#2B8AC8',logoTipo:'texto',
+   dir:'',tel:'+34 910 05 24 04',email:'info@impernave.com',
+   web:'https://impernave.com/',horario:'Lunes a Viernes 9h a 17h',
+   banco:'Banco ABANCA',iban:'ES6920805830763040076067',
+   condPago:COND_PAGO_DEF,condPrecio:COND_PRECIO_DEF,
+   firmaNombre:'Impermeabilizacion Balear',firmaRol:'Administración'},
+];
+
+// ════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════
+const KP='pp_presupuestos',KS='pp_servicios',KE='pp_empresas',KA='pp_active';
+let empresas=JSON.parse(localStorage.getItem(KE)||'null')||DEFAULT_EMPRESAS;
+let presupuestos=JSON.parse(localStorage.getItem(KP)||'[]');
+let servicios=JSON.parse(localStorage.getItem(KS)||'[]');
+let activeEmpId=localStorage.getItem(KA)||empresas[0].id;
+
+const savePres=()=>localStorage.setItem(KP,JSON.stringify(presupuestos));
+const saveSrvs=()=>localStorage.setItem(KS,JSON.stringify(servicios));
+const saveEmps=()=>localStorage.setItem(KE,JSON.stringify(empresas));
+const saveActive=()=>localStorage.setItem(KA,activeEmpId);
+
+const getEmp=id=>empresas.find(e=>e.id===(id||activeEmpId))||empresas[0];
+const activeEmp=()=>getEmp(activeEmpId);
+
+// ════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════
+const pad=n=>String(n).padStart(2,'0');
+const pad3=n=>String(n).padStart(3,'0');
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fm=n=>new Intl.NumberFormat('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
+const today=()=>{const d=new Date();return`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+
+// Budget number: YY + 3-digit sequence per company per year
+function nextNum(empId){
+  const y=new Date().getFullYear();
+  const y2=String(y).slice(-2);
+  const mine=presupuestos.filter(p=>p.empresaId===empId&&String(p.numero).startsWith(y2));
+  if(!mine.length)return`${y2}001`;
+  const nums=mine.map(p=>parseInt(String(p.numero).slice(2))||0);
+  return`${y2}${pad3(Math.max(...nums)+1)}`;
+}
+
+const EC={borrador:'#94a3b8',enviado:'#f59e0b',aceptado:'#22c55e',rechazado:'#ef4444'};
+const EL={borrador:'Borrador',enviado:'Enviado',aceptado:'Aceptado',rechazado:'Rechazado'};
+const EI={borrador:'📝',enviado:'📤',aceptado:'✅',rechazado:'❌'};
+
+let toastTm=null;
+function showToast(msg,err=false){
+  clearTimeout(toastTm);
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=err?'err':'';t.style.display='block';
+  toastTm=setTimeout(()=>t.style.display='none',3000);
+}
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let currentTab='lista';
+let editingPresId=null,lineasTemp=[],estadoTemp='borrador',editingLineaIdx=null;
+let editingSrvId=null,editingEmpId=null;
+let pendingAction=null;
+
+function updateEmpColors(){
+  const e=activeEmp();
+  document.documentElement.style.setProperty('--emp',e.logoColor||'#0099CC');
+}
+
+// ════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════
+function setTab(t){
+  currentTab=t;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('tab-'+t);if(el)el.classList.add('active');
+  const addBtn=document.getElementById('btn-add');
+  addBtn.style.display=t==='empresas'?'none':'flex';
+  render();
+}
+function onAddBtn(){
+  if(currentTab==='servicios')abrirModalSrv(null);
+  else abrirNuevo();
+}
+
+// ════════════════════════════════════════════
+// EMPRESA SWITCHER
+// ════════════════════════════════════════════
+function abrirEmpSwitcher(){
+  const list=document.getElementById('emp-switcher-list');
+  list.innerHTML=empresas.map(e=>`
+    <div class="emp-switch-item${e.id===activeEmpId?' active-emp':''}" onclick="switchEmp('${e.id}')">
+      <div style="width:38px;height:38px;border-radius:10px;background:${esc(e.logoColor)};display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:13px;flex-shrink:0">${esc(e.siglas||e.nombre.slice(0,2).toUpperCase())}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;color:var(--dark)">${esc(e.nombre)}</div>
+        <div style="font-size:11px;color:var(--gray)">${presupuestos.filter(p=>p.empresaId===e.id).length} presupuestos</div>
+      </div>
+      ${e.id===activeEmpId?'<span style="color:var(--emp);font-weight:700">✓ Activa</span>':''}
+    </div>`).join('');
+  document.getElementById('emp-switcher').classList.add('active');
+}
+function cerrarEmpSwitcher(){document.getElementById('emp-switcher').classList.remove('active');}
+function switchEmp(id){
+  activeEmpId=id;saveActive();updateEmpColors();
+  cerrarEmpSwitcher();render();
+  showToast(`✅ Empresa: ${getEmp(id).nombre}`);
+}
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function render(){
+  updateEmpColors();
+  const e=activeEmp();
+  document.getElementById('hdr-nombre').textContent=e.nombre;
+  const icon=document.getElementById('hdr-icon');
+  icon.textContent=e.siglas||e.nombre.slice(0,2).toUpperCase();
+  icon.style.background=e.logoColor||'#0099CC';
+  const el=document.getElementById('content');
+  if(currentTab==='lista')el.innerHTML=renderLista();
+  else if(currentTab==='clientes')el.innerHTML=renderClientes();
+  else if(currentTab==='servicios')el.innerHTML=renderServiciosTab();
+  else el.innerHTML=renderEmpresas();
+}
+
+// ─── LISTA ─────────────────────────────────
+function renderLista(){
+  const mine=presupuestos.filter(p=>p.empresaId===activeEmpId);
+  const acept=mine.filter(p=>p.estado==='aceptado').length;
+  const pend=mine.filter(p=>p.estado==='borrador'||p.estado==='enviado').length;
+  let html=`<div class="pad">
+  <div class="stat-row" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="stat-card"><div class="sv">${mine.length}</div><div class="sl">Total</div></div>
+    <div class="stat-card"><div class="sv" style="color:var(--emp)">${acept}</div><div class="sl">Aceptados</div></div>
+    <div class="stat-card"><div class="sv">${pend}</div><div class="sl">Pendientes</div></div>
+  </div>`;
+  if(!mine.length){
+    html+=`<div class="empty"><div class="icon">📄</div><div class="msg">Sin presupuestos</div><div class="sub">Pulsa + para crear el primero</div></div>`;
+  } else {
+    [...mine].sort((a,b)=>parseInt(b.numero)-parseInt(a.numero)).forEach(p=>{
+      const ec=EC[p.estado]||'#94a3b8';
+      const cls=p.estado==='aceptado'?'aceptado':p.estado==='rechazado'?'rechazado':p.estado==='enviado'?'enviado':'';
+      html+=`<div class="pres-card ${cls}" onclick="abrirVer('${p.id}')">
+        <div class="pres-main">
+          <div class="pres-num">#${esc(String(p.numero))}</div>
+          <div class="pres-info">
+            <div class="pres-cliente">${esc(p.cliente)}</div>
+            <div class="pres-meta">📅 ${esc(p.fecha)} · ${esc(p.direccion||'')}</div>
+            <span class="estado-badge" style="background:${ec}20;color:${ec}">${EI[p.estado]} ${EL[p.estado]}</span>
+          </div>
+          <div><div class="pres-total">${fm(p.total)}€</div></div>
+        </div>
+      </div>`;
+    });
+  }
+  return html+'</div>';
+}
+
+// ─── CLIENTES ──────────────────────────────
+function getClientes(){
+  const map={};
+  presupuestos.filter(p=>p.empresaId===activeEmpId).forEach(p=>{
+    const k=(p.tel||p.cliente).toLowerCase();
+    if(!map[k])map[k]={nombre:p.cliente,tel:p.tel||'',email:p.email||'',dir:p.direccion||'',pres:[]};
+    if(p.tel)map[k].tel=p.tel;
+    if(p.email)map[k].email=p.email;
+    if(p.direccion)map[k].dir=p.direccion;
+    map[k].pres.push(p);
+  });
+  return Object.values(map).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+}
+
+function renderClientes(){
+  const lista=getClientes();
+  let html=`<div class="pad">
+  <div class="stat-row" style="grid-template-columns:1fr 1fr">
+    <div class="stat-card"><div class="sv">${lista.length}</div><div class="sl">Clientes</div></div>
+    <div class="stat-card"><div class="sv" style="color:var(--emp)">${presupuestos.filter(p=>p.empresaId===activeEmpId).length}</div><div class="sl">Presupuestos</div></div>
+  </div>`;
+  if(!lista.length){
+    html+=`<div class="empty"><div class="icon">👥</div><div class="msg">Sin clientes aún</div><div class="sub">Se guardan automáticamente al crear presupuestos</div></div>`;
+  } else {
+    lista.forEach(cl=>{
+      const total=cl.pres.reduce((s,p)=>s+p.total,0);
+      html+=`<div class="cliente-card" onclick="abrirFichaCliente('${encodeURIComponent(cl.nombre)}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div><div style="font-weight:700;font-size:16px;color:var(--dark)">${esc(cl.nombre)}</div>
+          ${cl.tel?`<div style="font-size:13px;color:var(--gray)">📞 ${esc(cl.tel)}</div>`:''}
+          ${cl.email?`<div style="font-size:12px;color:var(--gray)">✉️ ${esc(cl.email)}</div>`:''}
+          ${cl.dir?`<div style="font-size:12px;color:var(--gray)">📍 ${esc(cl.dir)}</div>`:''}
+          </div>
+          <div style="text-align:right;flex-shrink:0;margin-left:8px">
+            <div style="font-weight:800;font-size:15px;color:var(--emp)">${fm(total)}€</div>
+            <div style="font-size:11px;color:var(--gray)">${cl.pres.length} pres.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onclick="event.stopPropagation();nuevoPres_cliente('${encodeURIComponent(cl.nombre)}')" style="padding:9px;border-radius:10px;border:none;background:var(--emp);color:white;font-size:12px;font-weight:700">➕ Nuevo presupuesto</button>
+          <button onclick="event.stopPropagation();abrirFichaCliente('${encodeURIComponent(cl.nombre)}')" style="padding:9px;border-radius:10px;border:2px solid var(--emp);background:var(--blight);color:var(--emp);font-size:12px;font-weight:700">📋 Historial</button>
+        </div>
+      </div>`;
+    });
+  }
+  return html+'</div>';
+}
+
+function abrirFichaCliente(nombreEnc){
+  const nombre=decodeURIComponent(nombreEnc);
+  const cl=getClientes().find(c=>c.nombre===nombre);if(!cl)return;
+  const e=activeEmp();
+  document.getElementById('mc-title').textContent=cl.nombre;
+  document.getElementById('mc-hdr').style.background=`linear-gradient(135deg,${e.logoColor},${e.logoColor}cc)`;
+  const sorted=[...cl.pres].sort((a,b)=>parseInt(b.numero)-parseInt(a.numero));
+  document.getElementById('mc-body').innerHTML=`
+    <div class="sec">
+      <div style="font-weight:700;font-size:17px;color:var(--dark);margin-bottom:6px">${esc(cl.nombre)}</div>
+      ${cl.tel?`<div style="font-size:13px;color:var(--gray)">📞 ${esc(cl.tel)}</div>`:''}
+      ${cl.email?`<div style="font-size:13px;color:var(--gray)">✉️ ${esc(cl.email)}</div>`:''}
+      ${cl.dir?`<div style="font-size:13px;color:var(--gray)">📍 ${esc(cl.dir)}</div>`:''}
+      <button onclick="document.getElementById('modal-cliente').classList.remove('active');nuevoPres_cliente('${encodeURIComponent(cl.nombre)}')" style="width:100%;margin-top:12px;padding:12px;border-radius:12px;border:none;background:var(--emp);color:white;font-size:14px;font-weight:700">➕ Crear nuevo presupuesto</button>
+    </div>
+    <div class="sec">
+      <div class="sec-title">📋 Historial (${sorted.length})</div>
+      ${sorted.map(p=>{const ec=EC[p.estado]||'#94a3b8';return`
+        <div style="background:#f8fafc;border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:3px solid ${ec};cursor:pointer" onclick="document.getElementById('modal-cliente').classList.remove('active');setTimeout(()=>abrirVer('${p.id}'),200)">
+          <div style="display:flex;justify-content:space-between">
+            <span style="font-weight:700">#${esc(String(p.numero))}</span> <span style="color:var(--gray);font-size:12px">${esc(p.fecha)}</span> <span style="font-weight:700;color:var(--emp)">${fm(p.total)}€</span>
+          </div>
+          <span class="estado-badge" style="background:${ec}20;color:${ec}">${EI[p.estado]} ${EL[p.estado]}</span>
+        </div>`}).join('')}
+    </div>`;
+  document.getElementById('modal-cliente').classList.add('active');
+}
+
+function nuevoPres_cliente(nombreEnc){
+  const nombre=decodeURIComponent(nombreEnc);
+  const cl=getClientes().find(c=>c.nombre===nombre);
+  abrirNuevo();
+  if(cl){
+    document.getElementById('p-cliente').value=cl.nombre;
+    document.getElementById('p-tel').value=cl.tel||'';
+    document.getElementById('p-email').value=cl.email||'';
+    document.getElementById('p-dir').value=cl.dir||'';
+  }
+}
+
+// ─── SERVICIOS TAB ─────────────────────────
+function renderServiciosTab(){
+  const mine=servicios.filter(s=>s.empresaId===activeEmpId);
+  let html=`<div class="pad">
+  <div class="page-title">🔧 Mis Servicios</div>
+  <div style="font-size:13px;color:var(--gray);margin-bottom:14px;line-height:1.5">Al añadir una línea de trabajo, selecciona un servicio del desplegable para rellenarlo automáticamente. Siempre puedes escribir libremente.</div>`;
+  if(!mine.length){
+    html+=`<div class="empty"><div class="icon">🔧</div><div class="msg">Sin servicios</div><div class="sub">Pulsa + para añadir el primero</div></div>`;
+  } else {
+    mine.forEach(s=>{
+      html+=`<div class="srv-item">
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px;color:var(--dark)">${esc(s.concepto)}</div>
+          ${s.desc?`<div style="font-size:12px;color:var(--gray);margin-top:2px">${esc(s.desc.slice(0,80))}${s.desc.length>80?'...':''}</div>`:''}
+          ${s.precio?`<div style="font-size:13px;color:var(--emp);font-weight:700;margin-top:3px">${fm(s.precio)} €</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;margin-left:10px">
+          <button onclick="abrirModalSrv('${s.id}')" style="padding:7px 10px;border-radius:10px;border:none;background:#eff6ff;color:#2563eb;font-size:12px;font-weight:700">✏️</button>
+          <button onclick="pedirEliminar('srv','${s.id}','¿Eliminar este servicio?')" style="padding:7px 10px;border-radius:10px;border:none;background:#fee2e2;color:var(--red);font-size:12px;font-weight:700">🗑️</button>
+        </div>
+      </div>`;
+    });
+  }
+  return html+'</div>';
+}
+
+// ─── EMPRESAS TAB ──────────────────────────
+function renderEmpresas(){
+  let html=`<div class="pad">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="page-title" style="margin-bottom:0">🏢 Mis Empresas</div>
+    <button onclick="abrirModalEmp(null)" style="padding:8px 14px;border-radius:20px;border:none;background:var(--purple);color:white;font-size:13px;font-weight:700">+ Añadir</button>
+  </div>`;
+  empresas.forEach(e=>{
+    const mine=presupuestos.filter(p=>p.empresaId===e.id).length;
+    const isActive=e.id===activeEmpId;
+    html+=`<div class="emp-card${isActive?' activa':''}" onclick="switchEmp('${e.id}')">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="width:44px;height:44px;border-radius:12px;background:${esc(e.logoColor)};display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:${e.logoTipo==='texto'?'9':'16'}px;flex-shrink:0;text-align:center;line-height:1.2">${e.logoTipo==='texto'?esc(e.nombre.slice(0,6)):esc(e.siglas||e.nombre.slice(0,2).toUpperCase())}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:16px;color:var(--dark)">${esc(e.nombre)}</div>
+          <div style="font-size:12px;color:var(--gray)">${esc(e.email)} · ${mine} presupuestos</div>
+          ${isActive?`<span style="background:${e.logoColor}20;color:${e.logoColor};border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">✓ Empresa activa</span>`:''}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button onclick="event.stopPropagation();switchEmp('${e.id}')" style="padding:9px;border-radius:10px;border:none;background:${isActive?e.logoColor+'20':'var(--blight)'};color:${isActive?e.logoColor:'var(--emp)'};font-size:12px;font-weight:700">${isActive?'✓ Activa':'Activar'}</button>
+        <button onclick="event.stopPropagation();abrirModalEmp('${e.id}')" style="padding:9px;border-radius:10px;border:none;background:#eff6ff;color:#2563eb;font-size:12px;font-weight:700">✏️ Editar datos</button>
+      </div>
+    </div>`;
+  });
+  html+=`<div class="settings-sec" style="margin-top:4px">
+    <div class="settings-title">☁️ Copias de Seguridad</div>
+    <button onclick="backupCompleto()" style="width:100%;padding:12px;border-radius:12px;border:none;background:var(--emp);color:white;font-size:14px;font-weight:700;margin-bottom:8px;cursor:pointer">☁️ Guardar Copia de Seguridad</button>
+    <button onclick="document.getElementById('inp-restore-emp').click()" style="width:100%;padding:12px;border-radius:12px;border:2px solid var(--emp);background:var(--blight);color:var(--emp);font-size:14px;font-weight:700;cursor:pointer">♻️ Restaurar Copia de Seguridad</button>
+    <input type="file" id="inp-restore-emp" accept=".json" style="display:none" onchange="restaurar(this)">
+  </div>`;
+  return html+'</div>';
+}
+
+// ════════════════════════════════════════════
+// CRUD: PRESUPUESTOS
+// ════════════════════════════════════════════
+function abrirNuevo(prefill={}){
+  editingPresId=null;lineasTemp=[];estadoTemp='borrador';
+  const e=activeEmp();
+  document.getElementById('mp-title').textContent='➕ Nuevo Presupuesto';
+  document.getElementById('modal-pres-hdr').style.background=`linear-gradient(135deg,${e.logoColor},${e.logoColor}cc)`;
+  document.getElementById('p-num').value=nextNum(activeEmpId);
+  document.getElementById('p-fecha').value=today();
+  document.getElementById('p-cliente').value=prefill.cliente||'';
+  document.getElementById('p-dir').value=prefill.dir||'';
+  document.getElementById('p-tel').value=prefill.tel||'';
+  document.getElementById('p-email').value=prefill.email||'';
+  document.getElementById('p-notas').value='';
+  document.getElementById('p-iva').value='10';
+  selEstado('borrador');renderLineas();calcTotales();
+  document.getElementById('modal-pres').classList.add('active');
+}
+function cerrarModalPres(){document.getElementById('modal-pres').classList.remove('active');}
+
+function abrirEditar(id){
+  const p=presupuestos.find(x=>x.id===id);if(!p)return;
+  cerrarModalVer();
+  const e=getEmp(p.empresaId);
+  editingPresId=id;lineasTemp=[...p.lineas];estadoTemp=p.estado;
+  document.getElementById('mp-title').textContent=`✏️ Editar #${p.numero}`;
+  document.getElementById('modal-pres-hdr').style.background=`linear-gradient(135deg,${e.logoColor},${e.logoColor}cc)`;
+  document.getElementById('p-num').value=p.numero;
+  document.getElementById('p-fecha').value=p.fecha;
+  document.getElementById('p-cliente').value=p.cliente;
+  document.getElementById('p-dir').value=p.direccion||'';
+  document.getElementById('p-tel').value=p.tel||'';
+  document.getElementById('p-email').value=p.email||'';
+  document.getElementById('p-notas').value=p.notas||'';
+  document.getElementById('p-iva').value=String(p.ivaPct||10);
+  selEstado(p.estado);renderLineas();calcTotales();
+  document.getElementById('modal-pres').classList.add('active');
+}
+
+function duplicarPres(id){
+  const p=presupuestos.find(x=>x.id===id);if(!p)return;
+  cerrarModalVer();
+  const e=getEmp(p.empresaId);
+  editingPresId=null;lineasTemp=[...p.lineas];estadoTemp='borrador';
+  document.getElementById('mp-title').textContent=`📋 Duplicar #${p.numero}`;
+  document.getElementById('modal-pres-hdr').style.background=`linear-gradient(135deg,${e.logoColor},${e.logoColor}cc)`;
+  document.getElementById('p-num').value=nextNum(p.empresaId);
+  document.getElementById('p-fecha').value=today();
+  document.getElementById('p-cliente').value=p.cliente;
+  document.getElementById('p-dir').value=p.direccion||'';
+  document.getElementById('p-tel').value=p.tel||'';
+  document.getElementById('p-email').value=p.email||'';
+  document.getElementById('p-notas').value=p.notas||'';
+  document.getElementById('p-iva').value=String(p.ivaPct||10);
+  selEstado('borrador');renderLineas();calcTotales();
+  document.getElementById('modal-pres').classList.add('active');
+  showToast('📋 Duplicado — cambia los datos que necesites');
+}
+
+function selEstado(est){
+  estadoTemp=est;
+  ['borrador','enviado','aceptado','rechazado'].forEach(e=>{
+    document.getElementById('est-'+e).className='estado-opt'+(e===est?' so-'+e:'');
+  });
+}
+
+function renderLineas(){
+  const c=document.getElementById('lineas-container');if(!c)return;
+  c.innerHTML=lineasTemp.map((l,i)=>`
+    <div class="linea-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1;padding-right:8px">
+          <div class="linea-concepto">${esc(l.concepto)}</div>
+          ${l.desc?`<div class="linea-desc">${esc(l.desc)}</div>`:''}
+        </div>
+        <button class="btn-del" onclick="eliminarLinea(${i})">✕</button>
+      </div>
+      <div class="linea-nums">Cant: <span>${fm(l.cantidad)}</span> · <span>${fm(l.precio)}€</span>/ud · Total: <span style="color:var(--emp)">${fm(l.total)}€</span></div>
+    </div>`).join('');
+}
+
+function calcTotales(){
+  const sub=lineasTemp.reduce((s,l)=>s+l.total,0);
+  const ivaPct=parseFloat(document.getElementById('p-iva')?.value||10);
+  const iva=sub*(ivaPct/100),tot=sub+iva;
+  const s=n=>fm(n)+' €';
+  const ts=document.getElementById('t-sub');if(ts)ts.textContent=s(sub);
+  const ti=document.getElementById('t-iva');if(ti)ti.textContent=s(iva);
+  const tl=document.getElementById('t-iva-lbl');if(tl)tl.textContent=`IVA ${ivaPct}%`;
+  const tt=document.getElementById('t-total');if(tt)tt.textContent=s(tot);
+  return{sub,iva,tot,ivaPct};
+}
+function eliminarLinea(i){lineasTemp.splice(i,1);renderLineas();calcTotales();}
+
+function guardarPresupuesto(){
+  const cliente=document.getElementById('p-cliente').value.trim();
+  if(!cliente){showToast('⚠️ El nombre del cliente es obligatorio',true);return;}
+  if(!lineasTemp.length){showToast('⚠️ Añade al menos una línea de trabajo',true);return;}
+  const{sub,iva,tot,ivaPct}=calcTotales();
+  const entry={
+    id:editingPresId||uid(),
+    empresaId:editingPresId?(presupuestos.find(p=>p.id===editingPresId)?.empresaId||activeEmpId):activeEmpId,
+    numero:document.getElementById('p-num').value.trim(),
+    fecha:document.getElementById('p-fecha').value.trim(),
+    estado:estadoTemp,cliente,
+    direccion:document.getElementById('p-dir').value.trim(),
+    tel:document.getElementById('p-tel').value.trim(),
+    email:document.getElementById('p-email').value.trim(),
+    notas:document.getElementById('p-notas').value.trim(),
+    lineas:[...lineasTemp],subtotal:sub,ivaPct,ivaImporte:iva,total:tot,
+  };
+  if(editingPresId)presupuestos=presupuestos.map(p=>p.id===editingPresId?entry:p);
+  else presupuestos.push(entry);
+  savePres();cerrarModalPres();showToast(editingPresId?'✅ Actualizado':'✅ Presupuesto creado');render();
+}
+
+// ════════════════════════════════════════════
+// CRUD: LÍNEAS
+// ════════════════════════════════════════════
+function abrirModalLinea(idx){
+  editingLineaIdx=idx;
+  const l=idx!==null?lineasTemp[idx]:null;
+  const e=activeEmp();
+  document.getElementById('linea-hdr').style.background=`linear-gradient(135deg,${e.logoColor},${e.logoColor}cc)`;
+  document.getElementById('l-concepto').value=l?l.concepto:'';
+  document.getElementById('l-desc').value=l?l.desc||'':'';
+  document.getElementById('l-cant').value=l?l.cantidad:1;
+  document.getElementById('l-precio').value=l?l.precio:'';
+  actualizarPreviewLinea();
+  // Fill services dropdown
+  const mine=servicios.filter(s=>s.empresaId===activeEmpId);
+  const sel=document.getElementById('l-servicio-sel');
+  sel.innerHTML='<option value="">— Seleccionar servicio guardado —</option>'+
+    mine.map(s=>`<option value="${s.id}">${esc(s.concepto)}${s.precio?' ('+fm(s.precio)+'€)':''}</option>`).join('');
+  sel.value='';
+  document.getElementById('modal-linea').classList.add('active');
+}
+function cerrarModalLinea(){document.getElementById('modal-linea').classList.remove('active');}
+
+function aplicarServicio(id){
+  if(!id)return;
+  const s=servicios.find(x=>x.id===id);if(!s)return;
+  document.getElementById('l-concepto').value=s.concepto||'';
+  document.getElementById('l-desc').value=s.desc||'';
+  if(s.precio)document.getElementById('l-precio').value=s.precio;
+  actualizarPreviewLinea();
+}
+function actualizarPreviewLinea(){
+  const c=parseFloat(document.getElementById('l-cant')?.value)||0;
+  const p=parseFloat(document.getElementById('l-precio')?.value)||0;
+  const el=document.getElementById('l-total-preview');if(el)el.textContent=fm(c*p)+' €';
+}
+document.addEventListener('input',e=>{if(['l-cant','l-precio'].includes(e.target.id))actualizarPreviewLinea();});
+
+function guardarLinea(){
+  const concepto=document.getElementById('l-concepto').value.trim();
+  if(!concepto){showToast('⚠️ El concepto es obligatorio',true);return;}
+  const cant=parseFloat(document.getElementById('l-cant').value)||1;
+  const precio=parseFloat(document.getElementById('l-precio').value)||0;
+  const linea={concepto,desc:document.getElementById('l-desc').value.trim(),cantidad:cant,precio,total:cant*precio};
+  if(editingLineaIdx!==null)lineasTemp[editingLineaIdx]=linea;
+  else lineasTemp.push(linea);
+  cerrarModalLinea();renderLineas();calcTotales();
+}
+
+// ════════════════════════════════════════════
+// CRUD: SERVICIOS
+// ════════════════════════════════════════════
+function abrirModalSrv(id){
+  editingSrvId=id;
+  const s=id?servicios.find(x=>x.id===id):null;
+  const e=activeEmp();
+  document.getElementById('srv-hdr').style.background=`linear-gradient(135deg,${e.logoColor},${e.logoColor}cc)`;
+  document.getElementById('srv-title').textContent=id?'✏️ Editar Servicio':'➕ Nuevo Servicio';
+  document.getElementById('s-concepto').value=s?s.concepto:'';
+  document.getElementById('s-desc').value=s?s.desc||'':'';
+  document.getElementById('s-precio').value=s?s.precio||'':'';
+  document.getElementById('modal-srv').classList.add('active');
+}
+function cerrarModalSrv(){document.getElementById('modal-srv').classList.remove('active');}
+function guardarServicio(){
+  const concepto=document.getElementById('s-concepto').value.trim();
+  if(!concepto){showToast('⚠️ El concepto es obligatorio',true);return;}
+  const entry={id:editingSrvId||uid(),empresaId:activeEmpId,concepto,desc:document.getElementById('s-desc').value.trim(),precio:parseFloat(document.getElementById('s-precio').value)||0};
+  if(editingSrvId)servicios=servicios.map(s=>s.id===editingSrvId?entry:s);
+  else servicios.push(entry);
+  saveSrvs();cerrarModalSrv();showToast(editingSrvId?'✅ Servicio actualizado':'✅ Servicio guardado');render();
+}
+
+// ════════════════════════════════════════════
+// CRUD: EMPRESAS
+// ════════════════════════════════════════════
+function abrirModalEmp(id){
+  editingEmpId=id;
+  const e=id?empresas.find(x=>x.id===id):null;
+  document.getElementById('emp-form-title').textContent=id?`✏️ Editar ${e?.nombre||''}`:' Nueva Empresa';
+  document.getElementById('e-nombre').value=e?e.nombre:'';
+  document.getElementById('e-siglas').value=e?e.siglas||'':'';
+  document.getElementById('e-color').value=e?e.logoColor||'#0099CC':'#0099CC';
+  document.getElementById('e-logo-tipo').value=e?e.logoTipo||'iniciales':'iniciales';
+  document.getElementById('e-dir').value=e?e.dir||'':'';
+  document.getElementById('e-tel').value=e?e.tel||'':'';
+  document.getElementById('e-email').value=e?e.email||'':'';
+  document.getElementById('e-web').value=e?e.web||'':'';
+  document.getElementById('e-horario').value=e?e.horario||'':'';
+  document.getElementById('e-banco').value=e?e.banco||'':'';
+  document.getElementById('e-iban').value=e?e.iban||'':'';
+  document.getElementById('e-cond-pago').value=e?e.condPago||COND_PAGO_DEF:COND_PAGO_DEF;
+  document.getElementById('e-cond-precio').value=e?e.condPrecio||COND_PRECIO_DEF:COND_PRECIO_DEF;
+  document.getElementById('e-firma-nombre').value=e?e.firmaNombre||'':'';
+  document.getElementById('e-firma-rol').value=e?e.firmaRol||'':'';
+  document.getElementById('modal-emp').classList.add('active');
+}
+function cerrarModalEmp(){document.getElementById('modal-emp').classList.remove('active');}
+function guardarEmpresa(){
+  const nombre=document.getElementById('e-nombre').value.trim();
+  if(!nombre){showToast('⚠️ El nombre es obligatorio',true);return;}
+  const entry={
+    id:editingEmpId||uid(),nombre,
+    siglas:document.getElementById('e-siglas').value.trim(),
+    logoColor:document.getElementById('e-color').value,
+    logoTipo:document.getElementById('e-logo-tipo').value,
+    dir:document.getElementById('e-dir').value.trim(),
+    tel:document.getElementById('e-tel').value.trim(),
+    email:document.getElementById('e-email').value.trim(),
+    web:document.getElementById('e-web').value.trim(),
+    horario:document.getElementById('e-horario').value.trim(),
+    banco:document.getElementById('e-banco').value.trim(),
+    iban:document.getElementById('e-iban').value.trim(),
+    condPago:document.getElementById('e-cond-pago').value.trim(),
+    condPrecio:document.getElementById('e-cond-precio').value.trim(),
+    firmaNombre:document.getElementById('e-firma-nombre').value.trim(),
+    firmaRol:document.getElementById('e-firma-rol').value.trim(),
+  };
+  if(editingEmpId)empresas=empresas.map(e=>e.id===editingEmpId?entry:e);
+  else{empresas.push(entry);activeEmpId=entry.id;saveActive();}
+  saveEmps();cerrarModalEmp();updateEmpColors();showToast(editingEmpId?'✅ Empresa actualizada':'✅ Empresa creada');render();
+}
+
+// ════════════════════════════════════════════
+// VER PRESUPUESTO
+// ════════════════════════════════════════════
+function abrirVer(id){
+  const p=presupuestos.find(x=>x.id===id);if(!p)return;
+  const e=getEmp(p.empresaId);
+  const ec=EC[p.estado]||'#94a3b8';
+  document.getElementById('mv-title').textContent=`Presupuesto #${p.numero}`;
+  document.getElementById('modal-ver-hdr').style.background=`linear-gradient(135deg,${e.logoColor},${e.logoColor}cc)`;
+  document.getElementById('mv-body').innerHTML=`
+    <div class="sec">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <div style="font-size:10px;color:var(--gray);font-weight:600;text-transform:uppercase">${esc(e.nombre)}</div>
+          <div style="font-size:22px;font-weight:800;color:var(--dark)">#${esc(String(p.numero))}</div>
+          <div style="color:var(--gray);font-size:13px">📅 ${esc(p.fecha)}</div>
+        </div>
+        <span class="estado-badge" style="background:${ec}20;color:${ec};font-size:13px;padding:6px 14px">${EI[p.estado]} ${EL[p.estado]}</span>
+      </div>
+      <div style="font-weight:700;font-size:17px;color:var(--dark)">${esc(p.cliente)}</div>
+      ${p.direccion?`<div style="font-size:13px;color:var(--gray);margin-top:2px">📍 ${esc(p.direccion)}</div>`:''}
+      ${p.tel?`<div style="font-size:13px;color:var(--gray)">📞 ${esc(p.tel)}</div>`:''}
+      ${p.email?`<div style="font-size:13px;color:var(--gray)">✉️ ${esc(p.email)}</div>`:''}
+    </div>
+    <div class="sec">
+      <div class="sec-title">🔨 Trabajos</div>
+      ${p.lineas.map(l=>`<div class="linea-item">
+        <div class="linea-concepto">${esc(l.concepto)}</div>
+        ${l.desc?`<div class="linea-desc">${esc(l.desc)}</div>`:''}
+        <div class="linea-nums" style="margin-top:5px">Cant: <span>${fm(l.cantidad)}</span> · ${fm(l.precio)}€/ud · <span style="color:var(--emp)">${fm(l.total)}€</span></div>
+      </div>`).join('')}
+      <div class="totals-box" style="margin-top:10px">
+        <div class="total-row"><span>Subtotal</span><span>${fm(p.subtotal)} €</span></div>
+        <div class="total-row"><span>IVA ${p.ivaPct}%</span><span>${fm(p.ivaImporte)} €</span></div>
+        <div class="total-row final"><span>TOTAL</span><span>${fm(p.total)} €</span></div>
+      </div>
+    </div>
+    ${p.notas?`<div class="sec"><div class="sec-title">📝 Notas</div><div style="font-size:13px;color:var(--gray)">${esc(p.notas)}</div></div>`:''}
+    <div class="sec">
+      <div class="sec-title">📤 Acciones</div>
+      <div class="act-grid">
+        <button class="act-btn" style="background:var(--emp)" onclick="abrirPDF('${p.id}')"><span class="ai">📄</span>Ver / PDF</button>
+        <button class="act-btn" style="background:#25D366" onclick="abrirShareWA('${p.id}')"><span class="ai">💬</span>WhatsApp</button>
+        <button class="act-btn" style="background:#ea4335" onclick="enviarEmail('${p.id}')"><span class="ai">✉️</span>Email</button>
+        <button class="act-btn" style="background:var(--purple)" onclick="duplicarPres('${p.id}')"><span class="ai">📋</span>Duplicar</button>
+      </div>
+      <button class="act-full" style="background:#eff6ff;color:#2563eb" onclick="abrirEditar('${p.id}')">✏️ Editar presupuesto</button>
+      <button class="act-full" style="background:#fee2e2;color:var(--red)" onclick="pedirEliminar('pres','${p.id}','¿Eliminar este presupuesto?')">🗑️ Eliminar</button>
+    </div>`;
+  document.getElementById('modal-ver').classList.add('active');
+}
+function cerrarModalVer(){document.getElementById('modal-ver').classList.remove('active');}
+
+// ════════════════════════════════════════════
+// PDF
+// ════════════════════════════════════════════
+function abrirPDF(id){
+  const p=presupuestos.find(x=>x.id===id);if(!p)return;
+  const e=getEmp(p.empresaId);
+  const clr=e.logoColor||'#0099CC';
+  const esTexto=e.logoTipo==='texto';
+  const lineasHTML=p.lineas.map((l,i)=>`
+    <tr style="background:${i%2===0?'#fff':'#f8fafc'}">
+      <td style="padding:9px 10px;font-size:10.5px;color:#333;border-bottom:1px solid #eef2f5;vertical-align:top">
+        <strong style="display:block;margin-bottom:2px">${esc(l.concepto)}</strong>
+        ${l.desc?`<span style="color:#555;font-size:10px;line-height:1.5">${esc(l.desc)}</span>`:''}
+      </td>
+      <td style="padding:9px 10px;font-size:10.5px;text-align:center;border-bottom:1px solid #eef2f5;white-space:nowrap">${fm(l.cantidad)}</td>
+      <td style="padding:9px 10px;font-size:10.5px;text-align:right;border-bottom:1px solid #eef2f5;white-space:nowrap">${fm(l.precio)} €</td>
+      <td style="padding:9px 10px;font-size:10.5px;text-align:right;border-bottom:1px solid #eef2f5;font-weight:700;white-space:nowrap">${fm(l.total)} €</td>
+    </tr>`).join('');
+
+  const logoHTML=esTexto
+    ?`<div style="font-size:28px;font-weight:900;color:#0d2233;letter-spacing:-1px">${esc(e.nombre)}</div>`
+    :`<div style="display:flex;align-items:center;gap:12px">
+        <div style="width:54px;height:54px;background:${clr};border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:20px">${esc(e.siglas||e.nombre.slice(0,2).toUpperCase())}</div>
+        <div><div style="font-size:16px;font-weight:900;color:#0d2233;text-transform:uppercase">${esc(e.nombre)}</div>
+        <div style="font-size:10px;color:${clr};font-weight:600">IMPERMEABILIZACIÓN PROFESIONAL</div></div>
+      </div>`;
+
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Presupuesto ${esc(String(p.numero))} - ${esc(e.nombre)}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f5f5}
+.bar{position:fixed;top:0;left:0;right:0;background:${clr};color:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99}
+.bar button{background:white;color:${clr};border:none;border-radius:20px;padding:8px 18px;font-weight:700;font-size:13px;cursor:pointer}
+.bar .hint{font-size:11px;opacity:.85;margin-top:2px}
+.doc{max-width:800px;margin:66px auto 30px;background:white;box-shadow:0 4px 30px rgba(0,0,0,.15)}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 26px 16px;border-bottom:3px solid ${clr}}
+.pt{font-size:36px;font-weight:900;color:#dde8f0;letter-spacing:3px;align-self:center}
+.cb{background:#f8fafc;padding:8px 26px;display:flex;gap:18px;flex-wrap:wrap;font-size:9.5px;color:#666;border-bottom:1px solid #e8eef5}
+.bd{padding:18px 26px}
+.ir{display:flex;gap:14px;margin-bottom:16px}
+.clb{flex:1;background:#f8fafc;border-radius:8px;padding:12px;border-left:3px solid ${clr}}
+.cll{font-size:8.5px;font-weight:700;color:${clr};text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.cln{font-weight:700;font-size:12px;color:#0d2233}
+.cld{font-size:10px;color:#444;margin-top:3px;line-height:1.5}
+.sb{background:${clr};border-radius:10px;padding:12px 16px;text-align:center;min-width:155px;align-self:flex-start}
+.sl{font-size:8.5px;color:rgba(255,255,255,.8);font-weight:600;text-transform:uppercase;margin-bottom:3px}
+.sv{font-size:11px;color:white;font-weight:700}
+.stv{font-size:20px;font-weight:900;color:white}
+.hr2{border:none;border-top:1px solid rgba(255,255,255,.3);margin:6px 0}
+table{width:100%;border-collapse:collapse;margin-bottom:14px}
+thead tr{background:${clr}}
+th{padding:9px 10px;text-align:left;font-size:9.5px;font-weight:700;color:white;text-transform:uppercase}
+th:nth-child(n+2){text-align:right}th:nth-child(2){text-align:center}
+.tw{display:flex;justify-content:flex-end;margin-bottom:14px}
+.ti{width:230px;border:1px solid #e0e8f0;border-radius:8px;overflow:hidden}
+.tr2{display:flex;justify-content:space-between;padding:7px 12px;font-size:10.5px;border-bottom:1px solid #e8eef3}
+.tfin{background:${clr};color:white;font-weight:800;font-size:13px;border:none}
+.ft{display:flex;gap:14px;padding-top:12px;border-top:2px solid #e0e8f0}
+.fp{flex:1;font-size:9px;color:#444;line-height:1.7}
+.fc{background:#f8fafc;border-radius:6px;padding:9px;font-size:8.5px;color:#555;line-height:1.5;flex:1}
+.sg{text-align:right;margin-top:14px;padding-top:10px;border-top:1px solid #e0e8f0}
+.sgl{border-top:1px solid #0d2233;width:120px;margin:26px 0 4px auto}
+.bb{background:#f8fafc;padding:8px 26px;display:flex;justify-content:space-between;font-size:9px;color:#666;border-top:1px solid #e0e8f0}
+@media print{.bar{display:none!important}.doc{margin:0;box-shadow:none}}
+</style></head><body>
+<div class="bar">
+  <div><div style="font-weight:700;font-size:14px">📄 Presupuesto #${esc(String(p.numero))} — ${esc(e.nombre)}</div>
+  <div class="hint">iPhone: Compartir ⬆ → Imprimir → Guardar como PDF</div></div>
+  <button onclick="window.print()">🖨️ PDF</button>
+</div>
+<div class="doc">
+  <div class="dh">
+    ${logoHTML}
+    <div class="pt">PRESUPUESTO</div>
+  </div>
+  <div class="cb">
+    <span>✉ ${esc(e.email)}</span><span>📞 ${esc(e.tel)}</span>
+    <span>🕐 ${esc(e.horario)}</span><span>🌐 ${esc(e.web)}</span>
+  </div>
+  <div class="bd">
+    <div class="ir">
+      <div class="clb">
+        <div class="cll">A la atención de</div>
+        <div class="cln">${esc(p.cliente)}</div>
+        <div class="cld">
+          ${p.direccion?esc(p.direccion)+'<br>':''}
+          ${p.tel?'Tel: '+esc(p.tel)+'<br>':''}
+          ${p.email?'Email: '+esc(p.email):''}
+        </div>
+      </div>
+      <div class="sb">
+        <div class="sl">Total Presupuesto</div><div class="stv">${fm(p.total)} €</div>
+        <div class="hr2"></div>
+        <div class="sl">Fecha</div><div class="sv">${esc(p.fecha)}</div>
+        <div class="hr2"></div>
+        <div class="sl">Nº Presupuesto</div><div class="sv">${esc(String(p.numero))}</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:56%">Artículo / Servicio</th>
+        <th style="width:11%;text-align:center">Cantidad</th>
+        <th style="width:16%;text-align:right">Precio /ud</th>
+        <th style="width:17%;text-align:right">Total</th>
+      </tr></thead>
+      <tbody>${lineasHTML}</tbody>
+    </table>
+    <div class="tw"><div class="ti">
+      <div class="tr2"><span>Subtotal</span><span>${fm(p.subtotal)} €</span></div>
+      <div class="tr2"><span>IVA ${p.ivaPct}%</span><span>${fm(p.ivaImporte)} €</span></div>
+      <div class="tr2 tfin"><span>TOTAL</span><span>${fm(p.total)} €</span></div>
+    </div></div>
+    <div class="ft">
+      <div class="fp">
+        <strong>💳 Transferencia bancaria</strong><br>${esc(e.banco)}<br>IBAN ${esc(e.iban)}<br><br>
+        <strong>Condiciones de pago:</strong><br>${esc(e.condPago)}
+      </div>
+      <div>
+        <div class="fc"><strong>Condiciones del precio:</strong><br>${esc(e.condPrecio)}${p.notas?'<br><br><strong>Notas:</strong><br>'+esc(p.notas):''}</div>
+        <div class="sg">
+          <strong style="font-size:10px">${esc(e.firmaNombre)}</strong><br>
+          <span style="font-size:9px;color:#666">${esc(e.firmaRol)}</span>
+          <div class="sgl"></div>
+          <span style="font-size:8px;color:#999">Firma cliente:</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bb"><span>✉ ${esc(e.email)}</span><span>📞 ${esc(e.tel)}</span><span>🌐 ${esc(e.web)}</span></div>
+</div>
+</body></html>`;
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.target='_blank';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+}
+
+// ════════════════════════════════════════════
+// WHATSAPP & EMAIL
+// ════════════════════════════════════════════
+function abrirShareWA(id){
+  const p=presupuestos.find(x=>x.id===id);if(!p)return;
+  const e=getEmp(p.empresaId);
+  document.getElementById('share-title').textContent=`💬 Enviar a ${p.cliente}`;
+  document.getElementById('share-hdr').style.background=`linear-gradient(135deg,${e.logoColor},${e.logoColor}cc)`;
+  document.getElementById('share-body').innerHTML=`
+    <div style="font-size:13px;color:var(--gray);line-height:1.5;margin-bottom:12px">2 pasos para enviar el PDF por WhatsApp:</div>
+    <div class="step-box"><div class="step-num" style="background:var(--emp)">1</div>
+      <div><div class="step-text">Genera y guarda el PDF</div>
+      <div class="step-sub">Se abre → Compartir ⬆ → Guardar en Archivos</div></div>
+    </div>
+    <button onclick="abrirPDF('${id}')" style="width:100%;padding:13px;border-radius:12px;border:none;background:var(--emp);color:white;font-size:14px;font-weight:700;margin-bottom:10px">📄 Abrir y guardar PDF</button>
+    <div class="step-box"><div class="step-num" style="background:#25D366">2</div>
+      <div><div class="step-text">Abrir WhatsApp</div>
+      <div class="step-sub">Se abre WhatsApp → adjunta el PDF con el 📎</div></div>
+    </div>
+    <button onclick="enviarWA('${id}')" style="width:100%;padding:13px;border-radius:12px;border:none;background:#25D366;color:white;font-size:14px;font-weight:700;margin-bottom:8px">💬 Abrir WhatsApp</button>
+    <button onclick="document.getElementById('modal-share').classList.remove('active')" style="width:100%;padding:11px;border-radius:12px;border:2px solid #e0e8f0;background:white;font-size:13px;font-weight:600;color:var(--gray)">Cerrar</button>`;
+  document.getElementById('modal-share').classList.add('active');
+}
+function enviarWA(id){
+  const p=presupuestos.find(x=>x.id===id);if(!p)return;
+  const e=getEmp(p.empresaId);
+  const tel=(p.tel||'').replace(/\s+/g,'').replace(/^00/,'+').replace(/^0/,'');
+  const msg=`Hola ${p.cliente} 👋\n\nLe enviamos el *Presupuesto nº ${p.numero}* de *${e.nombre}*.\n\n📋 Trabajos:\n${p.lineas.map(l=>`• ${l.concepto}`).join('\n')}\n\n💰 *TOTAL: ${fm(p.total)} €* (IVA ${p.ivaPct}% incluido)\n📅 Fecha: ${p.fecha}\n\nAdjuntamos el PDF con todos los detalles.\n\n${e.tel} | ${e.email}`;
+  window.open(`https://wa.me/${tel||''}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+function enviarEmail(id){
+  const p=presupuestos.find(x=>x.id===id);if(!p)return;
+  const e=getEmp(p.empresaId);
+  const asunto=`Presupuesto nº ${p.numero} - ${e.nombre}`;
+  const cuerpo=`Estimado/a ${p.cliente},\n\nAdjunto encontrará el presupuesto nº ${p.numero}:\n\n${p.lineas.map(l=>`- ${l.concepto}: ${fm(l.total)}€`).join('\n')}\n\nSubtotal: ${fm(p.subtotal)}€\nIVA ${p.ivaPct}%: ${fm(p.ivaImporte)}€\nTOTAL: ${fm(p.total)}€\n\nFecha: ${p.fecha}\n\nUn saludo,\n${e.firmaNombre}\n${e.tel} | ${e.email}\n${e.web}`;
+  window.location.href=`mailto:${p.email||''}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+}
+
+// ════════════════════════════════════════════
+// ELIMINAR
+// ════════════════════════════════════════════
+function pedirEliminar(tipo,id,msg){
+  pendingAction={tipo,id};
+  document.getElementById('confirm-msg').textContent=msg||'¿Eliminar?';
+  document.getElementById('modal-confirm').classList.add('active');
+}
+function cerrarConfirm(){document.getElementById('modal-confirm').classList.remove('active');}
+function confirmAction(){
+  if(!pendingAction)return;
+  const{tipo,id}=pendingAction;
+  if(tipo==='pres'){presupuestos=presupuestos.filter(p=>p.id!==id);savePres();cerrarModalVer();showToast('🗑️ Presupuesto eliminado');}
+  else if(tipo==='srv'){servicios=servicios.filter(s=>s.id!==id);saveSrvs();showToast('🗑️ Servicio eliminado');}
+  cerrarConfirm();render();
+}
+
+// ════════════════════════════════════════════
+// BACKUP
+// ════════════════════════════════════════════
+function backupCompleto(){
+  const d=new Date();
+  const n=`presupuestospro_backup_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
+  const data={version:3,fecha:d.toISOString(),empresas,presupuestos,servicios,activeEmpId};
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,2));
+  a.download=n;document.body.appendChild(a);a.click();document.body.removeChild(a);
+  showToast('☁️ Copia guardada');
+}
+function restaurar(input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=function(ev){
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(!d.presupuestos)throw new Error('Formato inválido');
+      if(!confirm(`¿Restaurar copia del ${new Date(d.fecha).toLocaleDateString('es-ES')}? Se reemplazarán todos los datos actuales.`))return;
+      if(d.empresas)empresas=d.empresas;
+      presupuestos=d.presupuestos;
+      if(d.servicios)servicios=d.servicios;
+      if(d.activeEmpId)activeEmpId=d.activeEmpId;
+      saveEmps();savePres();saveSrvs();saveActive();
+      showToast('✅ Datos restaurados correctamente');render();
+    }catch(err){showToast('❌ Archivo de copia no válido',true);}
+  };
+  r.readAsText(file);input.value='';
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+updateEmpColors();
+render();
+</script>
+</body>
+</html>
